@@ -83,7 +83,7 @@ Buka JagaLink, tekan **Hidupkan** untuk setiap baris sampai semua ✅:
 5. Jangan dimatikan di latar belakang
 6. Notifikasi amaran
 
-Kemudian isi **nama panggilan** (cth Mak, Ayah, Atuk) dan **nombor telefon anda** (untuk butang "📞 Tanya anak dulu") → Simpan. Tekan **Tunjuk bot amaran** untuk tengok bot keluar.
+Kemudian isi **nama panggilan** (cth Mak, Ayah, Atuk) dan **nombor telefon anda** (untuk butang "💬 Hantar link ke anak" — buka WhatsApp anda dengan link scam tu — dan "📞 Tanya anak dulu") → Simpan. Tekan **Tunjuk bot amaran** untuk tengok bot keluar.
 
 **WhatsApp kedua (Samsung Dual Messenger):** WhatsApp kedua guna salinan JagaLink yang berasingan. Kali pertama bot keluar dari WhatsApp kedua, tekan **⚙️ Isi nama & nombor anak untuk WhatsApp kedua** pada kad amaran dan simpan sekali lagi. (Dalam profil tu bot berbunyi "beep" kerana tiada enjin suara.)
 
@@ -167,7 +167,7 @@ Choose the language at the top (**Melayu / English / 中文**), then tap **Turn 
 5. Keep running in the background
 6. Warning notifications
 
-Then fill in **what the bot calls the user** (e.g. Mum, Dad, Grandma) and **your phone number** (for the "📞 Ask my child first" button) → **Save**. Tap **Show warning bot (example)** to see the bot.
+Then fill in **what the bot calls the user** (e.g. Mum, Dad, Grandma) and **your phone number** (for the "💬 Send link to my child" button — opens WhatsApp to you with the scam link — and "📞 Ask my child first") → **Save**. Tap **Show warning bot (example)** to see the bot.
 
 **Second WhatsApp (Samsung Dual Messenger):** it uses a separate copy of JagaLink. The first time the bot appears from the second WhatsApp, tap **⚙️ Set name & child's number for the second WhatsApp** on the warning card and save again. (In that profile the bot beeps instead of speaking — there is no voice engine there.)
 
