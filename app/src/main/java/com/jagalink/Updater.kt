@@ -78,6 +78,25 @@ object Updater {
         }
     }
 
+    /**
+     * Nota release untuk dialog: hanya bahagian "apa yang baru" (berhenti di "Cara pasang"),
+     * tanpa simbol markdown supaya senang dibaca.
+     */
+    fun shortNotes(notes: String): String =
+        notes.lineSequence()
+            .takeWhile { !Regex("(?i)^#+.*(cara pasang|how to install|安装)").containsMatchIn(it.trim()) }
+            .map { line ->
+                line.trim()
+                    .replace(Regex("^#+\\s*"), "")
+                    .replace(Regex("^>\\s*"), "")
+                    .replace(Regex("^[-*]\\s+"), "• ")
+                    .replace("**", "")
+                    .replace(Regex("\\[([^]]+)]\\([^)]+\\)"), "$1")
+            }
+            .joinToString("\n")
+            .replace(Regex("\n{3,}"), "\n\n")
+            .trim()
+
     /** "1.10" > "1.9" — banding nombor satu-satu. */
     fun isNewer(remote: String, local: String): Boolean {
         fun parts(v: String) = v.split('.', '-', ' ').map { p -> p.takeWhile { it.isDigit() }.toIntOrNull() ?: 0 }

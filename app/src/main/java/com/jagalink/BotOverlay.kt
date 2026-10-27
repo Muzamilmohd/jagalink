@@ -192,6 +192,14 @@ object BotUi {
 
         val phone = Prefs.phone(ctx)
         if (phone.isNotBlank()) {
+            val sendLabel = ctx.tr("💬  Hantar link ke anak", "💬  Send link to my child", "💬  把链接发给孩子")
+            card.addView(bigButton(ctx, sendLabel, Color.rgb(37, 211, 102)) {
+                if (!AskChild.send(ctx, v, app)) {
+                    Toast.makeText(ctx, ctx.tr("Tak dapat buka WhatsApp / SMS", "Couldn't open WhatsApp / SMS", "无法打开 WhatsApp / 短信"), Toast.LENGTH_SHORT).show()
+                }
+                onDismiss()
+            }, spaced(ctx, 10))
+
             val askLabel = ctx.tr("📞  Tanya anak dulu", "📞  Ask my child first", "📞  先问孩子")
             card.addView(bigButton(ctx, askLabel, Color.rgb(25, 118, 210)) {
                 try {

@@ -218,6 +218,68 @@ object Notifier {
     }
 }
 
+/** Hantar link mencurigakan ke WhatsApp anak supaya dia boleh semak. */
+object AskChild {
+
+    /** "011-2345 678" / "+6011…" → "60112345678" (format antarabangsa tanpa +). */
+    fun normalizePhone(raw: String): String {
+        val digits = raw.filter { it.isDigit() }
+        return when {
+            digits.startsWith("60") -> digits
+            digits.startsWith("0") -> "6$digits"
+            else -> digits
+        }
+    }
+
+    /**
+     * Link "dijinakkan" — tak boleh ditekan dan WhatsApp tak buat preview
+     * (preview akan buat phone Mak buka laman scam tu).
+     */
+    fun defang(url: String): String =
+        url.replace(Regex("^(?i)http"), "hxxp").replace(".", "[.]")
+
+    fun message(ctx: Context, v: Verdict, app: String?): String {
+        val name = Prefs.callName(ctx)
+        val where = app?.let { ctx.tr(" dalam $it", " in $it", "在 $it ") }.orEmpty()
+        val what = when {
+            v.adult -> ctx.tr("laman lucah (dah disekat)", "a porn site (blocked)", "色情网站（已拦截）")
+            v.level == Level.DANGER -> ctx.tr("BAHAYA", "DANGEROUS", "很危险")
+            else -> ctx.tr("mencurigakan", "suspicious", "可疑")
+        }
+        val link = defang(v.url)
+        return ctx.tr(
+            "Hai, $name dapat link ni$where. JagaLink kata ia $what. Boleh tolong semak? 🙏\n\n$link\n\n(Link sengaja diubah supaya tak terbuka bila ditekan.)",
+            "Hi, $name got this link$where. JagaLink says it's $what. Can you check it? 🙏\n\n$link\n\n(The link was changed on purpose so it won't open when tapped.)",
+            "你好，${name}${where}收到这个链接。JagaLink 说它$what。可以帮忙看看吗？🙏\n\n$link\n\n（链接已特意修改，点击不会打开。）",
+        )
+    }
+
+    /** WhatsApp → WhatsApp Business → SMS. Pulangkan false kalau semua gagal. */
+    fun send(ctx: Context, v: Verdict, app: String?): Boolean {
+        val phone = normalizePhone(Prefs.phone(ctx))
+        if (phone.isEmpty()) return false
+        val text = message(ctx, v, app)
+        val wa = Uri.parse("https://api.whatsapp.com/send?phone=$phone&text=${Uri.encode(text)}")
+        for (pkg in listOf("com.whatsapp", "com.whatsapp.w4b")) {
+            try {
+                ctx.startActivity(Intent(Intent.ACTION_VIEW, wa).setPackage(pkg).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                return true
+            } catch (_: Exception) {
+            }
+        }
+        return try {
+            ctx.startActivity(
+                Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$phone"))
+                    .putExtra("sms_body", text)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+}
+
 /** Cari browser sebenar (Chrome dsb) untuk buka link yang selamat. */
 object Browsers {
     private val PREFERRED = listOf(

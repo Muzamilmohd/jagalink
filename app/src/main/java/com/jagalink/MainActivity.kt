@@ -213,7 +213,7 @@ class MainActivity : Activity() {
     private fun showUpdateDialog(rel: Updater.Release) {
         AlertDialog.Builder(this)
             .setTitle(tr("Versi baru ${rel.version}", "New version ${rel.version}", "新版本 ${rel.version}"))
-            .setMessage(rel.notes.ifBlank { tr("Ada kemas kini untuk JagaLink.", "An update for JagaLink is available.", "JagaLink 有可用更新。") })
+            .setMessage(Updater.shortNotes(rel.notes).ifBlank { tr("Ada kemas kini untuk JagaLink.", "An update for JagaLink is available.", "JagaLink 有可用更新。") })
             .setPositiveButton(tr("Kemas kini", "Update", "更新")) { _, _ -> startInstall(rel) }
             .setNegativeButton(tr("Nanti", "Later", "稍后"), null)
             .show()
