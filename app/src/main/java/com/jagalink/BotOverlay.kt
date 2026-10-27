@@ -22,7 +22,7 @@ import android.widget.Toast
 
 /** Tentukan bila bot perlu keluar (elak amaran berulang untuk link yang sama). */
 object WarnCenter {
-    enum class Source { NOTIFICATION, SCREEN, CLICK }
+    enum class Source { SCREEN, CLICK }
 
     private val seen = HashMap<String, Long>()
 
@@ -32,7 +32,6 @@ object WarnCenter {
         if (worst.level == Level.SAFE) return
 
         val window = when (source) {
-            Source.NOTIFICATION -> 30 * 60_000L      // 30 minit
             Source.SCREEN -> 6 * 60 * 60_000L        // 6 jam (chat lama tak ganggu berulang)
             Source.CLICK -> 5_000L                   // tekan link = sentiasa beri amaran
         }

@@ -28,14 +28,14 @@ Semua semakan dibuat **dalam telefon**. Tiada mesej atau link dihantar ke mana-m
 3. Tekan **Pasang**.
 
 > ⚠️ **Keluar "App blocked to protect your device" (Google Play Protect)?**
-> Ini perkara biasa. Google sekat **semua** app dari luar Play Store yang minta kebenaran *Kebolehcapaian* dan *Baca notifikasi* — JagaLink perlukan kedua-duanya untuk mengesan scam. Dialog tu tiada butang "pasang juga", jadi:
+> Ini perkara biasa. Google sekat **semua** app dari luar Play Store yang minta kebenaran *Kebolehcapaian* (baca skrin) — JagaLink perlukan kebenaran tu untuk mengesan scam. Dialog tu tiada butang "pasang juga", jadi:
 > 1. Buka **Play Store** → tekan **gambar profil** → **Play Protect** → ⚙️ (atas kanan) → matikan **"Scan apps with Play Protect"**.
 > 2. Pasang APK sekali lagi.
 > 3. **Hidupkan semula** "Scan apps with Play Protect" terus selepas pasang.
 >
 > Atau guna **Cara B** (ADB) — sekatan ni tak kena pada pemasangan melalui kabel.
 
-> 🔒 **Suis "Baca skrin" / "Baca notifikasi" / "Pop-up bot" kelabu, tak boleh tekan?**
+> 🔒 **Suis "Baca skrin" / "Pop-up bot" kelabu, tak boleh tekan?**
 > Android 13 ke atas sekat kebenaran sensitif untuk app yang dipasang dari browser ("Tetapan terhad").
 > 1. Tekan suis yang kelabu tu **sekali** → keluar dialog "Tetapan terhad" → OK. *(Wajib — pilihan seterusnya hanya muncul lepas ni.)*
 > 2. **Tetapan → Apl → JagaLink** → tekan **⋮** (atas kanan) → **Benarkan tetapan terhad** → sahkan dengan PIN.
@@ -66,22 +66,22 @@ JagaLink semak GitHub **sekali sehari** dan setiap kali app dibuka. Bila ada ver
 
 Boleh juga semak sendiri: buka JagaLink → **4. Kemas kini → Semak kemas kini**. Suis *Semak sendiri setiap hari* boleh dimatikan.
 
-## 3 lapisan perlindungan
+## 2 lapisan perlindungan
 | Lapisan | Bila bot keluar |
 |---|---|
-| Baca notifikasi | Mesej masuk ada link scam — sebelum Mak buka chat pun |
 | Baca skrin (Kebolehcapaian) | Mak buka chat/emel yang ada link scam, atau **tekan** mesej tu |
 | Pengawal link (browser utama) | Mak tekan link → JagaLink semak dulu. Selamat = terus buka Chrome. Bahaya = bot halang |
+
+JagaLink **tidak** baca mesej masuk atau notifikasi — ia hanya semak teks yang nampak di skrin dan link yang Mak tekan.
 
 ## ⚙️ Setup dalam app (sekali sahaja)
 Pilih bahasa di atas (**Melayu / English / 中文**), kemudian:
 Buka JagaLink, tekan **Hidupkan** untuk setiap baris sampai semua ✅:
 1. Pop-up bot atas skrin
-2. Baca mesej masuk
-3. Baca skrin → Kebolehcapaian → JagaLink → On
-4. Pengawal link → pilih **JagaLink** sebagai aplikasi pelayar (browser)
-5. Jangan dimatikan di latar belakang
-6. Notifikasi amaran
+2. Baca skrin → Kebolehcapaian → JagaLink → On
+3. Pengawal link → pilih **JagaLink** sebagai aplikasi pelayar (browser)
+4. Jangan dimatikan di latar belakang
+5. Notifikasi amaran
 
 Kemudian isi **nama panggilan** (cth Mak, Ayah, Atuk) dan **nombor telefon anda** (untuk butang "💬 Hantar link ke anak" — buka WhatsApp anda dengan link scam tu untuk anda semak) → Simpan. Tekan **Tunjuk bot amaran** untuk tengok bot keluar.
 
@@ -116,7 +116,7 @@ Semua senarai ada dalam `app/src/main/java/com/jagalink/LinkAnalyzer.kt`:
 
 **JagaLink** is a small robot that pops up over other apps to warn an elderly parent when a suspicious link or APK file appears in WhatsApp, Telegram, SMS, Facebook, Instagram, TikTok or email — or when they tap one. It detects fake bank/government/delivery sites (Maybank, CIMB, LHDN, Pos Laju, Shopee…), look-alike letters, shortened links, cheap scam domains, scam phrases (Malay, English, Chinese) and APK files, and **blocks adult sites**.
 
-All checks run **on the phone**. No messages or links are sent anywhere — the internet is only used to check GitHub for new versions. App language: Malay, English or 中文 (choose in the app).
+All checks run **on the phone**. No messages or links are sent anywhere — the internet is only used to check GitHub for new versions. JagaLink does **not** read incoming messages or notifications — it only checks text shown on screen and links that are tapped. App language: Malay, English or 中文 (choose in the app).
 
 ### 📥 How to install
 
@@ -128,14 +128,14 @@ All checks run **on the phone**. No messages or links are sent anywhere — the 
 3. Tap **Install**.
 
 > ⚠️ **"App blocked to protect your device" (Google Play Protect)?**
-> This is expected. Google automatically blocks apps from outside the Play Store that ask for *Accessibility* and *Notification access* — JagaLink needs both to detect scams. The dialog has no "install anyway" button, so:
+> This is expected. Google automatically blocks apps from outside the Play Store that ask for *Accessibility* (read screen) — JagaLink needs it to detect scams. The dialog has no "install anyway" button, so:
 > 1. Open **Play Store** → tap your **profile picture** → **Play Protect** → ⚙️ (top right) → turn off **"Scan apps with Play Protect"**.
 > 2. Install the APK again.
 > 3. **Turn "Scan apps with Play Protect" back on** right after installing.
 >
 > Or use **Option B** (ADB) — this block does not apply to installs over a cable.
 
-> 🔒 **"Read screen" / "Read notifications" / "Bot pop-up" switch is greyed out?**
+> 🔒 **"Read screen" / "Bot pop-up" switch is greyed out?**
 > Android 13+ restricts sensitive permissions for apps installed from a browser ("Restricted settings").
 > 1. Tap the greyed-out switch **once** → a "Restricted setting" dialog appears → OK. *(Required — the next option only appears after this.)*
 > 2. **Settings → Apps → JagaLink** → tap **⋮** (top right) → **Allow restricted settings** → confirm with your PIN.
@@ -161,11 +161,10 @@ All checks run **on the phone**. No messages or links are sent anywhere — the 
 ### ⚙️ First-time setup in the app
 Choose the language at the top (**Melayu / English / 中文**), then tap **Turn on** for each row until all are ✅:
 1. Bot pop-up on screen
-2. Read incoming messages
-3. Read screen → Accessibility → JagaLink → On
-4. Link guard → choose **JagaLink** as the browser app
-5. Keep running in the background
-6. Warning notifications
+2. Read screen → Accessibility → JagaLink → On
+3. Link guard → choose **JagaLink** as the browser app
+4. Keep running in the background
+5. Warning notifications
 
 Then fill in **what the bot calls the user** (e.g. Mum, Dad, Grandma) and **your phone number** (for the "💬 Send link to my child" button — opens WhatsApp to you with the scam link so you can check it) → **Save**. Tap **Show warning bot (example)** to see the bot.
 

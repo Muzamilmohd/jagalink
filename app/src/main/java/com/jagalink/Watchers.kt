@@ -1,42 +1,9 @@
 package com.jagalink
 
 import android.accessibilityservice.AccessibilityService
-import android.app.Notification
-import android.os.Build
-import android.os.Bundle
-import android.os.Parcelable
 import android.os.SystemClock
-import android.service.notification.NotificationListenerService
-import android.service.notification.StatusBarNotification
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-
-/** Baca mesej masuk dari WhatsApp, Telegram, SMS, Gmail dll — sebelum mak buka chat pun. */
-class NotificationWatcher : NotificationListenerService() {
-
-    override fun onNotificationPosted(sbn: StatusBarNotification) {
-        val app = Watched.APPS[sbn.packageName] ?: return
-        val ex = sbn.notification?.extras ?: return
-        val parts = mutableListOf<String>()
-        ex.getCharSequence(Notification.EXTRA_TITLE)?.let { parts += it.toString() }
-        ex.getCharSequence(Notification.EXTRA_TEXT)?.let { parts += it.toString() }
-        ex.getCharSequence(Notification.EXTRA_BIG_TEXT)?.let { parts += it.toString() }
-        ex.getCharSequence(Notification.EXTRA_SUB_TEXT)?.let { parts += it.toString() }
-        ex.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)?.forEach { parts += it.toString() }
-        messages(ex).forEach { parts += it }
-        WarnCenter.check(this, parts.joinToString("\n"), app, WarnCenter.Source.NOTIFICATION)
-    }
-
-    @Suppress("DEPRECATION")
-    private fun messages(ex: Bundle): List<String> {
-        val arr: Array<out Parcelable>? = if (Build.VERSION.SDK_INT >= 33) {
-            ex.getParcelableArray(Notification.EXTRA_MESSAGES, Parcelable::class.java)
-        } else {
-            ex.getParcelableArray(Notification.EXTRA_MESSAGES)
-        }
-        return arr.orEmpty().mapNotNull { (it as? Bundle)?.getCharSequence("text")?.toString() }
-    }
-}
 
 /** Baca teks atas skrin bila mak buka app sembang / emel, dan bila dia TEKAN sesuatu. */
 class ScreenWatcher : AccessibilityService() {

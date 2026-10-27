@@ -19,8 +19,8 @@ android {
         applicationId = "com.jagalink"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.3"
+        versionCode = 6
+        versionName = "1.4"
 
         // Repo GitHub (owner/nama) tempat semak update — tetapkan dalam gradle.properties
         val repo = (project.findProperty("jagalink.updateRepo") as String?).orEmpty()

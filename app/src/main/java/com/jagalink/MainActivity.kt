@@ -261,16 +261,6 @@ class MainActivity : Activity() {
             startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
         }
         row(
-            tr(
-                "Baca mesej masuk (WhatsApp, Telegram, SMS, emel)",
-                "Read incoming messages (WhatsApp, Telegram, SMS, email)",
-                "读取收到的信息（WhatsApp、Telegram、短信、电邮）",
-            ),
-            notifEnabled()
-        ) {
-            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-        }
-        row(
             tr("Baca skrin (Kebolehcapaian → JagaLink)", "Read screen (Accessibility → JagaLink)", "读取屏幕（无障碍 → JagaLink）"),
             a11yEnabled()
         ) {
@@ -294,10 +284,6 @@ class MainActivity : Activity() {
             row(tr("Notifikasi amaran", "Warning notifications", "警告通知"), ok) { requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1) }
         }
     }
-
-    private fun notifEnabled(): Boolean =
-        Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-            ?.contains(packageName) == true
 
     private fun a11yEnabled(): Boolean =
         Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)

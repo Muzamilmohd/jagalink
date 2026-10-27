@@ -15,8 +15,9 @@ templates next to Chinese text use `${name}`, not `$name` (Han characters count 
   `SUSPICIOUS_TLDS`, `SHORTENERS`. All checks run on-device; never send user messages anywhere.
   Adult sites (`ADULT_SITES`, `ADULT_WORDS`, `ADULT_TOKENS`, `ADULT_TLDS`) score 100 with
   `Verdict.adult = true` — hard-blocked: the bot card hides the "Buka juga" option.
-- `Watchers.kt` – `NotificationWatcher` (NotificationListenerService, reads incoming messages)
-  and `ScreenWatcher` (AccessibilityService, scans screen text + clicked views, throttled 1.5 s).
+- `Watchers.kt` – `ScreenWatcher` (AccessibilityService, scans screen text + clicked views, throttled 1.5 s).
+  There is deliberately **no** NotificationListenerService (removed in v1.4): the app must not read
+  incoming messages/notifications — only what is on screen and links the user taps.
 - `LinkGuardActivity.kt` – registered as a browser. When set as default browser every tapped link
   passes through it: SAFE → forwarded to the real browser (`Browsers.pick`), else bot screen.
 - `BotOverlay.kt` – `WarnCenter` (dedupe per URL/source), `BotOverlay` (TYPE_APPLICATION_OVERLAY
