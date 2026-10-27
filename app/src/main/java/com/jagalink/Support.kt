@@ -231,13 +231,6 @@ object AskChild {
         }
     }
 
-    /**
-     * Link "dijinakkan" — tak boleh ditekan dan WhatsApp tak buat preview
-     * (preview akan buat phone Mak buka laman scam tu).
-     */
-    fun defang(url: String): String =
-        url.replace(Regex("^(?i)http"), "hxxp").replace(".", "[.]")
-
     fun message(ctx: Context, v: Verdict, app: String?): String {
         val name = Prefs.callName(ctx)
         val where = app?.let { ctx.tr(" dalam $it", " in $it", "在 $it ") }.orEmpty()
@@ -246,11 +239,11 @@ object AskChild {
             v.level == Level.DANGER -> ctx.tr("BAHAYA", "DANGEROUS", "很危险")
             else -> ctx.tr("mencurigakan", "suspicious", "可疑")
         }
-        val link = defang(v.url)
+        val link = v.url
         return ctx.tr(
-            "Hai, $name dapat link ni$where. JagaLink kata ia $what. Boleh tolong semak? 🙏\n\n$link\n\n(Link sengaja diubah supaya tak terbuka bila ditekan.)",
-            "Hi, $name got this link$where. JagaLink says it's $what. Can you check it? 🙏\n\n$link\n\n(The link was changed on purpose so it won't open when tapped.)",
-            "你好，${name}${where}收到这个链接。JagaLink 说它$what。可以帮忙看看吗？🙏\n\n$link\n\n（链接已特意修改，点击不会打开。）",
+            "Hai, $name dapat link ni$where. JagaLink kata ia $what. Boleh tolong semak? 🙏\n\n$link",
+            "Hi, $name got this link$where. JagaLink says it's $what. Can you check it? 🙏\n\n$link",
+            "你好，${name}${where}收到这个链接。JagaLink 说它$what。可以帮忙看看吗？🙏\n\n$link",
         )
     }
 

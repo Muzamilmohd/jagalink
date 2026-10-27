@@ -1,12 +1,10 @@
 package com.jagalink
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -196,18 +194,6 @@ object BotUi {
             card.addView(bigButton(ctx, sendLabel, Color.rgb(37, 211, 102)) {
                 if (!AskChild.send(ctx, v, app)) {
                     Toast.makeText(ctx, ctx.tr("Tak dapat buka WhatsApp / SMS", "Couldn't open WhatsApp / SMS", "无法打开 WhatsApp / 短信"), Toast.LENGTH_SHORT).show()
-                }
-                onDismiss()
-            }, spaced(ctx, 10))
-
-            val askLabel = ctx.tr("📞  Tanya anak dulu", "📞  Ask my child first", "📞  先问孩子")
-            card.addView(bigButton(ctx, askLabel, Color.rgb(25, 118, 210)) {
-                try {
-                    ctx.startActivity(
-                        Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    )
-                } catch (_: Exception) {
                 }
                 onDismiss()
             }, spaced(ctx, 10))
