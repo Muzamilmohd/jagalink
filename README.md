@@ -1,5 +1,7 @@
 # JagaLink — Bot pengawal link scam untuk Mak
 
+**🇲🇾 Bahasa Melayu** · [🇬🇧 English](#-english)
+
 Bot kecil yang keluar atas skrin bila ada link mencurigakan dalam WhatsApp, Telegram, SMS, Facebook, Instagram, TikTok, Gmail/Outlook — atau bila Mak tekan link tersebut.
 
 ## Apa yang dikesan
@@ -32,6 +34,15 @@ Semua semakan dibuat **dalam telefon**. Tiada mesej atau link dihantar ke mana-m
 > 3. **Hidupkan semula** "Scan apps with Play Protect" terus selepas pasang.
 >
 > Atau guna **Cara B** (ADB) — sekatan ni tak kena pada pemasangan melalui kabel.
+
+> 🔒 **Suis "Baca skrin" / "Baca notifikasi" / "Pop-up bot" kelabu, tak boleh tekan?**
+> Android 13 ke atas sekat kebenaran sensitif untuk app yang dipasang dari browser ("Tetapan terhad").
+> 1. Tekan suis yang kelabu tu **sekali** → keluar dialog "Tetapan terhad" → OK. *(Wajib — pilihan seterusnya hanya muncul lepas ni.)*
+> 2. **Tetapan → Apl → JagaLink** → tekan **⋮** (atas kanan) → **Benarkan tetapan terhad** → sahkan dengan PIN.
+> 3. Kembali dan hidupkan semula suis tadi.
+>
+> **Xiaomi / Redmi / POCO:** juga buka **Tetapan → Apl → Urus apl → JagaLink → Kebenaran lain** → benarkan **"Paparkan tetingkap timbul"** dan **"…semasa berjalan di latar belakang"**.
+> Masih kelabu? Pasang guna **Cara B** (ADB) — app yang dipasang melalui kabel biasanya tak kena sekatan ni.
 
 ### Cara B — Pasang melalui komputer (ADB)
 1. Di phone: **Tetapan → Perihal telefon → Maklumat perisian → tekan "Nombor binaan" 7 kali** → masuk **Pilihan pembangun** → hidupkan **Penyahpepijatan USB**.
@@ -96,3 +107,86 @@ Semua senarai ada dalam `app/src/main/java/com/jagalink/LinkAnalyzer.kt`:
 - Ini pengesan berasaskan peraturan — ia tangkap kebanyakan taktik biasa tetapi bukan 100%. Teruskan ingatkan Mak: **jangan pasang APK, jangan bagi OTP/TAC**.
 - Kalau terkena scam: hubungi **NSRC 997** secepat mungkin, dan bank.
 - Pasang dengan pengetahuan Mak — terangkan ini "pengawal link" supaya dia tak tutup kebenarannya.
+
+---
+
+## 🇬🇧 English
+
+[🇲🇾 Bahasa Melayu](#jagalink--bot-pengawal-link-scam-untuk-mak) · **🇬🇧 English**
+
+**JagaLink** is a small robot that pops up over other apps to warn an elderly parent when a suspicious link or APK file appears in WhatsApp, Telegram, SMS, Facebook, Instagram, TikTok or email — or when they tap one. It detects fake bank/government/delivery sites (Maybank, CIMB, LHDN, Pos Laju, Shopee…), look-alike letters, shortened links, cheap scam domains, scam phrases (Malay, English, Chinese) and APK files, and **blocks adult sites**.
+
+All checks run **on the phone**. No messages or links are sent anywhere — the internet is only used to check GitHub for new versions. App language: Malay, English or 中文 (choose in the app).
+
+### 📥 How to install
+
+> **Download:** [Releases → JagaLink-vX.X.apk](https://github.com/Muzamilmohd/jagalink/releases/latest)
+
+#### Option A — Download the APK on the phone
+1. Open the [Releases page](https://github.com/Muzamilmohd/jagalink/releases/latest) in the phone's browser → tap **`JagaLink-vX.X.apk`**.
+2. When asked, allow the browser to **"Install unknown apps"**.
+3. Tap **Install**.
+
+> ⚠️ **"App blocked to protect your device" (Google Play Protect)?**
+> This is expected. Google automatically blocks apps from outside the Play Store that ask for *Accessibility* and *Notification access* — JagaLink needs both to detect scams. The dialog has no "install anyway" button, so:
+> 1. Open **Play Store** → tap your **profile picture** → **Play Protect** → ⚙️ (top right) → turn off **"Scan apps with Play Protect"**.
+> 2. Install the APK again.
+> 3. **Turn "Scan apps with Play Protect" back on** right after installing.
+>
+> Or use **Option B** (ADB) — this block does not apply to installs over a cable.
+
+> 🔒 **"Read screen" / "Read notifications" / "Bot pop-up" switch is greyed out?**
+> Android 13+ restricts sensitive permissions for apps installed from a browser ("Restricted settings").
+> 1. Tap the greyed-out switch **once** → a "Restricted setting" dialog appears → OK. *(Required — the next option only appears after this.)*
+> 2. **Settings → Apps → JagaLink** → tap **⋮** (top right) → **Allow restricted settings** → confirm with your PIN.
+> 3. Go back and turn the switch on.
+>
+> **Xiaomi / Redmi / POCO:** also open **Settings → Apps → Manage apps → JagaLink → Other permissions** → allow **"Display pop-up windows"** and **"…while running in the background"**.
+> Still greyed out? Install with **Option B** (ADB) — apps installed over a cable usually aren't restricted.
+
+#### Option B — Install from a computer (ADB)
+1. On the phone: **Settings → About phone → Software information → tap "Build number" 7 times** → open **Developer options** → turn on **USB debugging**.
+2. Connect the phone with a USB cable → allow **"Allow USB debugging"**.
+3. Install [Android platform-tools](https://developer.android.com/tools/releases/platform-tools) (includes `adb`), then:
+   ```
+   adb install -r JagaLink-vX.X.apk
+   ```
+
+#### Option C — Build from source (Android Studio)
+1. Install **Android Studio** (free) → open this project folder → wait for Gradle sync.
+2. Connect the phone (Option B steps 1–2) → select it at the top → press ▶ **Run**.
+
+> Self-built (debug) versions are signed with a different key and **cannot** receive updates from Releases. Uninstall first before switching to the Releases APK.
+
+### ⚙️ First-time setup in the app
+Choose the language at the top (**Melayu / English / 中文**), then tap **Turn on** for each row until all are ✅:
+1. Bot pop-up on screen
+2. Read incoming messages
+3. Read screen → Accessibility → JagaLink → On
+4. Link guard → choose **JagaLink** as the browser app
+5. Keep running in the background
+6. Warning notifications
+
+Then fill in **what the bot calls the user** (e.g. Mum, Dad, Grandma) and **your phone number** (for the "📞 Ask my child first" button) → **Save**. Tap **Show warning bot (example)** to see the bot.
+
+**Second WhatsApp (Samsung Dual Messenger):** it uses a separate copy of JagaLink. The first time the bot appears from the second WhatsApp, tap **⚙️ Set name & child's number for the second WhatsApp** on the warning card and save again. (In that profile the bot beeps instead of speaking — there is no voice engine there.)
+
+#### Tips by phone brand
+- **Xiaomi / Redmi / POCO**: Settings → Apps → JagaLink → *Autostart* ON, *Battery saver* = No restrictions.
+- **Oppo / Realme / Vivo**: Settings → Battery → JagaLink → allow background activity + Auto-launch.
+- **Samsung**: Settings → Device care → Battery → Background usage limits → make sure JagaLink is **not** in "Sleeping apps".
+- **Telegram**: Settings → Chat Settings → turn off *In-App Browser* so links go through JagaLink.
+- **Facebook / Instagram / TikTok** open links in their own browser — the link guard can't see those, but the bot still detects links shown on screen.
+
+### 🔄 Updates
+JagaLink checks GitHub **once a day** and whenever the app is opened. When a new version is out:
+1. A **"New JagaLink version …"** notification appears → tap it.
+2. Tap **Update** → (first time only) allow JagaLink to **install apps** → tap **Update** again.
+3. Android asks for confirmation → tap **Install**. Settings and permissions are kept.
+
+You can also check manually: open JagaLink → **4. Updates → Check for updates**.
+
+### Limits
+- This is a rule-based detector — it catches most common tricks but not 100%. Keep reminding your parent: **never install APKs, never share OTP/TAC codes**.
+- If scammed: call **NSRC 997** (Malaysia) as soon as possible, and the bank.
+- Install it with your parent's knowledge — explain it's a "link guard" so they don't turn its permissions off.
