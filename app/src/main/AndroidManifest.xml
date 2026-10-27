@@ -11,6 +11,8 @@
     <!-- Kemas kini dari GitHub: hanya semak & muat turun release, tiada data pengguna dihantar.
          REQUEST_INSTALL_PACKAGES tak dibenarkan di Play Store — buang untuk versi Play. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Wajib untuk JobScheduler dengan syarat rangkaian (semakan harian) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- Supaya semakan harian bersambung lepas phone restart -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

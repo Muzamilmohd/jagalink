@@ -153,19 +153,23 @@ object Updater {
 
     /** Jadualkan / batalkan semakan automatik sekali sehari (perlu internet). */
     fun schedule(ctx: Context) {
-        val js = ctx.getSystemService(JobScheduler::class.java)
-        if (!enabled || !Prefs.autoUpdate(ctx)) {
-            js.cancel(JOB_ID)
-            return
+        // Semakan update tak boleh sekali-kali buat app crash — perlindungan scam lebih penting.
+        try {
+            val js = ctx.getSystemService(JobScheduler::class.java)
+            if (!enabled || !Prefs.autoUpdate(ctx)) {
+                js.cancel(JOB_ID)
+                return
+            }
+            if (js.getPendingJob(JOB_ID) != null) return
+            js.schedule(
+                JobInfo.Builder(JOB_ID, ComponentName(ctx, UpdateJob::class.java))
+                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                    .setPeriodic(24 * 60 * 60_000L)
+                    .setPersisted(true)
+                    .build()
+            )
+        } catch (_: Exception) {
         }
-        if (js.getPendingJob(JOB_ID) != null) return
-        js.schedule(
-            JobInfo.Builder(JOB_ID, ComponentName(ctx, UpdateJob::class.java))
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                .setPeriodic(24 * 60 * 60_000L)
-                .setPersisted(true)
-                .build()
-        )
     }
 
     @SuppressLint("MissingPermission")
