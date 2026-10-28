@@ -42,12 +42,17 @@ button on the card, and `Alerts.beep()` when TTS can't speak. The main-profile S
 sees the cloned app's screen. Test with `adb shell am start --user 95 -n com.jagalink/.LinkGuardActivity -d <url>`.
 
 ## Build & run
-- minSdk 26, targetSdk/compileSdk 35, Gradle 9.1.0, AGP 8.13.0, Kotlin 2.2.20, bytecode target 17.
+- minSdk 26, targetSdk/compileSdk 36 (Play requirement; edge-to-edge insets handled in MainActivity), Gradle 9.1.0, AGP 8.13.0, Kotlin 2.2.20, bytecode target 17.
 - Only JDK on this machine is Android Studio's bundled JBR 25 (`C:\Program Files\Android\Android Studio\jbr`),
   hence the newer Gradle/AGP/Kotlin. Set `JAVA_HOME` to it. If Gradle fails with
   "Unable to establish loopback connection", set `JAVA_TOOL_OPTIONS=-Djdk.net.unixdomain.tmpdir=C:\gtmp`.
 - `local.properties` (gitignored) holds `sdk.dir=C:/Users/Mohd Muzamil/AppData/Local/Android/Sdk` — use forward slashes.
-  - Build: `./gradlew assembleDebug`
+  - Two product flavors (dimension "store"):
+    - `github` — GitHub Releases APK: self-update (Updater), optional Read screen (ScreenWatcher), overlay pop-up.
+    - `play` — Google Play AAB: `src/play/AndroidManifest.xml` strips INTERNET, REQUEST_INSTALL_PACKAGES,
+      battery-exemption, boot, overlay and the ScreenWatcher/UpdateJob/InstallResultReceiver components.
+      Only POST_NOTIFICATIONS + VIBRATE remain. Code branches on `BuildConfig.PLAY`.
+  - Build: `./gradlew assembleGithubDebug` (or `assemblePlayDebug`)
   - Install on connected phone: `./gradlew installDebug` (or `adb install -r app/build/outputs/apk/debug/app-debug.apk`)
   - Logs: `adb logcat | grep -i jagalink`
 - Quick engine test without Android: compile `LinkAnalyzer.kt` with `kotlinc` and run sample messages.
@@ -58,10 +63,14 @@ sees the cloned app's screen. Test with `adb shell am start --user 95 -n com.jag
   the release's `.apk` asset through `PackageInstaller`. Only release metadata/APK is fetched — no user data.
 - Release key: `jagalink-release.jks` + `keystore.properties` (gitignored, must be backed up). Every OTA APK
   must be signed with it, otherwise the install fails (signature mismatch).
-- To release: bump `versionCode` + `versionName` in `app/build.gradle.kts`, `./gradlew assembleRelease`,
-  copy to `dist/JagaPMA-v<ver>.apk`, then `gh release create v<ver> dist/JagaPMA-v<ver>.apk --notes "..."`.
+- To release: bump `versionCode` + `versionName` in `app/build.gradle.kts`, `./gradlew assembleGithubRelease`,
+  copy `app/build/outputs/apk/github/release/app-github-release.apk` to `dist/JagaPMA-v<ver>.apk`, then `gh release create v<ver> dist/JagaPMA-v<ver>.apk --notes "..."`.
   Tag must be `v` + versionName.
-- `REQUEST_INSTALL_PACKAGES` (self-update) is not allowed on Google Play — strip it and the Updater for a Play build.
+- `REQUEST_INSTALL_PACKAGES` (self-update) is not allowed on Google Play — handled by the `play` flavor.
+- Play: `./gradlew bundlePlayRelease` → `app/build/outputs/bundle/playRelease/app-play-release.aab` (copy to
+  `dist/JagaPMA-v<ver>-play.aab`). Store texts, Console answers and steps: `play/STORE_LISTING.md`; graphics in
+  `play/graphics/`; privacy policy `PRIVACY.md`. Play signs with its own app-signing key, so Play and GitHub
+  installs can't update each other (uninstall to switch).
 
 ## Status
 - LinkAnalyzer tested with 18 sample messages (scam + normal) — correct.

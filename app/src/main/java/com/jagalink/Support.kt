@@ -134,8 +134,8 @@ object Speaker {
 
     private fun speak(e: TextToSpeech, text: String, lang: Lang) {
         val choices = when (lang) {
-            Lang.MS -> listOf(Locale("ms", "MY"), Locale("id", "ID"))
-            Lang.EN -> listOf(Locale("en", "GB"), Locale.US)
+            Lang.MS -> listOf(Locale.forLanguageTag("ms-MY"), Locale.forLanguageTag("id-ID"))
+            Lang.EN -> listOf(Locale.UK, Locale.US)
             Lang.ZH -> listOf(Locale.SIMPLIFIED_CHINESE, Locale.CHINESE)
         }
         val ok = choices.any {

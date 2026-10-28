@@ -17,6 +17,7 @@ import android.text.InputType
 import android.view.Gravity
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowInsets
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -40,6 +41,14 @@ class MainActivity : Activity() {
             setPadding(dp(20), dp(24), dp(20), dp(48))
         }
         scroll.addView(col)
+        // Android 15+ lukis app sampai bawah status bar — tolak kandungan supaya tak bertindih
+        if (Build.VERSION.SDK_INT >= 35) {
+            scroll.setOnApplyWindowInsetsListener { _, insets ->
+                val bars = insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
+                col.setPadding(dp(20) + bars.left, dp(24) + bars.top, dp(20) + bars.right, dp(48) + bars.bottom)
+                insets
+            }
+        }
 
         col.addView(BotView(this, Level.SAFE), LinearLayout.LayoutParams(dp(120), dp(120)).apply {
             gravity = Gravity.CENTER_HORIZONTAL
@@ -86,7 +95,8 @@ class MainActivity : Activity() {
         col.addView(header(tr("1. Hidupkan pengawal", "1. Turn on protection", "1. 开启保护")))
         statusBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         col.addView(statusBox)
-        col.addView(
+        // "Tetapan terhad" hanya kena pada Baca skrin, yang tiada dalam versi Play
+        if (!BuildConfig.PLAY) col.addView(
             label(
                 tr(
                     "Kalau keluar \"Tetapan terhad / Restricted setting\": buka Info Aplikasi JagaPMA → ⋮ (atas kanan) → " +
@@ -148,11 +158,8 @@ class MainActivity : Activity() {
                 "Congratulations! Your account will be blocked. Verify now: http://maybank2u-secure.xyz/login",
                 "恭喜！您的账户将被冻结。请立即验证：http://maybank2u-secure.xyz/login",
             )
-            BotOverlay.show(
-                this, LinkAnalyzer.analyzeMessage(sample, Prefs.lang(this)).first(),
-                tr("Contoh", "Example", "示例")
-            )
-            if (!Settings.canDrawOverlays(this)) {
+            showBot(LinkAnalyzer.analyzeMessage(sample, Prefs.lang(this)).first(), tr("Contoh", "Example", "示例"))
+            if (!BuildConfig.PLAY && !Settings.canDrawOverlays(this)) {
                 toast(
                     tr(
                         "Hidupkan 'Pop-up bot' dulu — sekarang keluar sebagai notifikasi",
@@ -266,18 +273,26 @@ class MainActivity : Activity() {
 
     private fun refreshStatus() {
         statusBox.removeAllViews()
-        row(tr("Pop-up bot atas skrin", "Bot pop-up on screen", "屏幕上的机器人弹窗"), Settings.canDrawOverlays(this)) {
-            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+        if (!BuildConfig.PLAY) {
+            row(tr("Pop-up bot atas skrin", "Bot pop-up on screen", "屏幕上的机器人弹窗"), Settings.canDrawOverlays(this)) {
+                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+            }
         }
         row(
             tr("Pengawal link (jadikan browser utama)", "Link guard (set as default browser)", "链接守卫（设为默认浏览器）"),
             isDefaultBrowser()
         ) { requestBrowserRole() }
         row(tr("Jangan dimatikan di latar belakang", "Keep running in the background", "保持在后台运行"), ignoringBattery()) {
+            // Versi Play tiada kebenaran REQUEST_IGNORE_BATTERY_OPTIMIZATIONS — buka senarai tetapan sahaja
             try {
-                startActivity(
-                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName"))
-                )
+                if (BuildConfig.PLAY) {
+                    toast(tr("Cari JagaPMA → pilih \"Tidak dioptimumkan\"", "Find JagaPMA → choose \"Not optimised\"", "找到 JagaPMA → 选择「不优化」"))
+                    startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                } else {
+                    startActivity(
+                        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName"))
+                    )
+                }
             } catch (_: Exception) {
                 startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
             }
@@ -287,7 +302,9 @@ class MainActivity : Activity() {
             row(tr("Notifikasi amaran", "Warning notifications", "警告通知"), ok) { requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1) }
         }
 
-        // Pilihan — tanpa ni, bot masih semak setiap link yang ditekan (pengawal link)
+        // Pilihan — tanpa ni, bot masih semak setiap link yang ditekan (pengawal link).
+        // Versi Play tiada Baca skrin langsung.
+        if (BuildConfig.PLAY) return
         statusBox.addView(label(tr("Pilihan", "Optional", "可选"), 15f, bold = true, color = grey).apply {
             setPadding(0, dp(14), 0, 0)
         })
@@ -302,9 +319,7 @@ class MainActivity : Activity() {
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                 }
             }
-        ) {
-            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-        }
+        ) { showA11yDisclosure() }
         statusBox.addView(
             label(
                 tr(
@@ -315,6 +330,27 @@ class MainActivity : Activity() {
                 13f, color = grey
             )
         )
+    }
+
+    /** Pendedahan jelas (prominent disclosure) sebelum minta Kebolehcapaian — syarat polisi Google. */
+    private fun showA11yDisclosure() {
+        AlertDialog.Builder(this)
+            .setTitle(tr("Benarkan Baca skrin?", "Allow Read screen?", "允许读取屏幕？"))
+            .setMessage(
+                tr(
+                    "JagaPMA guna kebenaran Kebolehcapaian untuk membaca teks yang nampak di skrin dalam WhatsApp, Telegram, SMS, Facebook, Instagram, TikTok dan app emel, supaya bot boleh beri amaran bila ada link scam atau fail APK.\n\n" +
+                        "• Semua semakan dibuat dalam phone ini sahaja.\n• Tiada teks, mesej atau link disimpan, dikongsi atau dihantar ke mana-mana.\n• Boleh dimatikan bila-bila masa di skrin ini.",
+                    "JagaPMA uses the Accessibility permission to read the text shown on screen in WhatsApp, Telegram, SMS, Facebook, Instagram, TikTok and email apps, so the bot can warn about scam links or APK files.\n\n" +
+                        "• All checks happen on this phone only.\n• No text, messages or links are stored, shared or sent anywhere.\n• You can turn it off any time on this screen.",
+                    "JagaPMA 使用无障碍权限读取 WhatsApp、Telegram、短信、Facebook、Instagram、TikTok 和电邮应用屏幕上显示的文字，以便在出现诈骗链接或 APK 文件时提醒。\n\n" +
+                        "• 所有检查只在这部手机里进行。\n• 不会保存、分享或发送任何文字、信息或链接。\n• 可随时在此页面关闭。",
+                )
+            )
+            .setPositiveButton(tr("Setuju", "Agree", "同意")) { _, _ ->
+                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            }
+            .setNegativeButton(tr("Tak sekarang", "Not now", "暂不"), null)
+            .show()
     }
 
     private fun a11yEnabled(): Boolean =
@@ -380,8 +416,19 @@ class MainActivity : Activity() {
                 if (v.reasons.isEmpty()) "" else "\n" + v.reasons.joinToString("\n") { "• $it" }
         }
         verdicts.filter { it.level != Level.SAFE }.maxByOrNull { it.score }?.let {
-            BotOverlay.show(this, it, tr("Ujian", "Test", "测试"))
+            showBot(it, tr("Ujian", "Test", "测试"))
         }
+    }
+
+    /** Versi Play tiada pop-up atas app lain — tunjuk kad amaran melalui pengawal link. */
+    private fun showBot(v: Verdict, app: String) {
+        if (!BuildConfig.PLAY) {
+            BotOverlay.show(this, v, app)
+            return
+        }
+        // Fail APK (bukan link) — keputusan dah tertulis dalam kotak ujian
+        if (!v.url.startsWith("http", ignoreCase = true)) return
+        startActivity(Intent(this, LinkGuardActivity::class.java).setData(Uri.parse(v.url)))
     }
 
     // ------------------------------------------------------------ ui helpers

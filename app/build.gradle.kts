@@ -13,22 +13,37 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "com.jagalink"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.jagalink"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 8
-        versionName = "1.6"
-
-        // Repo GitHub (owner/nama) tempat semak update — tetapkan dalam gradle.properties
-        val repo = (project.findProperty("jagalink.updateRepo") as String?).orEmpty()
-        buildConfigField("String", "UPDATE_REPO", "\"$repo\"")
+        targetSdk = 36
+        versionCode = 9
+        versionName = "1.7"
     }
 
     buildFeatures {
         buildConfig = true
+    }
+
+    // github = APK di GitHub Releases (kemas kini sendiri + Baca skrin).
+    // play   = Google Play: tiada kemas kini sendiri, tiada internet, tiada Baca skrin
+    //          (kebenaran tu tak dibenarkan / perlu deklarasi khas di Play).
+    flavorDimensions += "store"
+    productFlavors {
+        create("github") {
+            dimension = "store"
+            // Repo GitHub (owner/nama) tempat semak update — tetapkan dalam gradle.properties
+            val repo = (project.findProperty("jagalink.updateRepo") as String?).orEmpty()
+            buildConfigField("String", "UPDATE_REPO", "\"$repo\"")
+            buildConfigField("boolean", "PLAY", "false")
+        }
+        create("play") {
+            dimension = "store"
+            buildConfigField("String", "UPDATE_REPO", "\"\"")
+            buildConfigField("boolean", "PLAY", "true")
+        }
     }
 
     signingConfigs {
