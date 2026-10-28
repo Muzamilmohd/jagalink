@@ -102,7 +102,7 @@ Note: JagaPMA helps, but no detector is perfect. Never share OTP/TAC codes with 
 |---|---|---|
 | App icon | 512 × 512 PNG | `play/graphics/icon-512.png` |
 | Feature graphic | 1024 × 500 PNG/JPG | `play/graphics/feature-1024x500.png` |
-| Phone screenshots | 2–8 keping, sisi panjang ≤ 2× sisi pendek | `play/graphics/screenshot-*.png` |
+| Phone screenshots | 2–8 keping, sisi panjang ≤ 2× sisi pendek | `play/graphics/screenshot-1-setup.png`, `screenshot-2-amaran.png`, `screenshot-3-apk.png` (1080 × 2160) |
 
 > Jangan letak logo bank sebenar dalam grafik/screenshot — Google boleh anggap menyamar jenama.
 
