@@ -32,7 +32,7 @@ Tiada iklan, tiada analitik, tiada SDK pihak ketiga.
 App ini tidak ditujukan kepada kanak-kanak dan tidak mengumpul data daripada sesiapa.
 
 ## Hubungi
-Mohd Muzamil — buka isu di https://github.com/Muzamilmohd/jagalink/issues
+Muzamil Mohd — buka isu di https://github.com/Muzamilmohd/jagalink/issues
 
 ---
 
@@ -68,4 +68,4 @@ No ads, no analytics, no third-party SDKs.
 This app is not directed at children and does not collect data from anyone.
 
 ### Contact
-Mohd Muzamil — open an issue at https://github.com/Muzamilmohd/jagalink/issues
+Muzamil Mohd — open an issue at https://github.com/Muzamilmohd/jagalink/issues

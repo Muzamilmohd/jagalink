@@ -196,7 +196,7 @@ class MainActivity : Activity() {
         col.addView(
             label(
                 "JagaPMA v${BuildConfig.VERSION_NAME} · " +
-                    tr("Dibangunkan oleh Mohd Muzamil", "Developed by Mohd Muzamil", "开发者：Mohd Muzamil"),
+                    tr("Dibangunkan oleh Muzamil Mohd", "Developed by Muzamil Mohd", "开发者：Muzamil Mohd"),
                 12f, color = Color.rgb(158, 158, 158), center = true
             ).apply { setPadding(0, dp(32), 0, 0) }
         )
