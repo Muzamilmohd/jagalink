@@ -186,6 +186,14 @@ class MainActivity : Activity() {
             if (fromNotification || (Prefs.autoUpdate(this) && stale)) checkUpdate(quiet = !fromNotification)
         }
 
+        col.addView(
+            label(
+                "JagaPMA v${BuildConfig.VERSION_NAME} · " +
+                    tr("Dibangunkan oleh Mohd Muzamil", "Developed by Mohd Muzamil", "开发者：Mohd Muzamil"),
+                12f, color = Color.rgb(158, 158, 158), center = true
+            ).apply { setPadding(0, dp(32), 0, 0) }
+        )
+
         setContentView(scroll)
     }
 
@@ -285,7 +293,15 @@ class MainActivity : Activity() {
         })
         row(
             tr("Baca skrin (Kebolehcapaian → JagaPMA)", "Read screen (Accessibility → JagaPMA)", "读取屏幕（无障碍 → JagaPMA）"),
-            a11yEnabled(), optional = true
+            a11yEnabled(), optional = true,
+            onOff = {
+                if (ScreenWatcher.turnOff()) {
+                    toast(tr("Baca skrin dimatikan", "Read screen turned off", "已关闭读取屏幕"))
+                    statusBox.postDelayed({ refreshStatus() }, 600)
+                } else {
+                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                }
+            }
         ) {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
@@ -370,7 +386,13 @@ class MainActivity : Activity() {
 
     // ------------------------------------------------------------ ui helpers
 
-    private fun row(title: String, ok: Boolean, optional: Boolean = false, onFix: () -> Unit) {
+    private fun row(
+        title: String,
+        ok: Boolean,
+        optional: Boolean = false,
+        onOff: (() -> Unit)? = null,
+        onFix: () -> Unit,
+    ) {
         val r = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -386,6 +408,7 @@ class MainActivity : Activity() {
             LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f)
         )
         if (!ok) r.addView(Button(this).apply { text = tr("Hidupkan", "Turn on", "开启"); setOnClickListener { onFix() } })
+        else if (onOff != null) r.addView(Button(this).apply { text = tr("Matikan", "Turn off", "关闭"); setOnClickListener { onOff() } })
         statusBox.addView(r)
     }
 

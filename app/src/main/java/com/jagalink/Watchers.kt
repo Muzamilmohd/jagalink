@@ -10,6 +10,28 @@ class ScreenWatcher : AccessibilityService() {
 
     private var lastScan = 0L
 
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        instance = this
+    }
+
+    override fun onDestroy() {
+        if (instance === this) instance = null
+        super.onDestroy()
+    }
+
+    companion object {
+        @Volatile private var instance: ScreenWatcher? = null
+
+        /** Matikan "Baca skrin" terus dari app. False kalau servis tak berjalan (buka Tetapan sebagai ganti). */
+        fun turnOff(): Boolean {
+            val s = instance ?: return false
+            s.disableSelf()
+            instance = null
+            return true
+        }
+    }
+
     override fun onAccessibilityEvent(e: AccessibilityEvent) {
         val pkg = e.packageName?.toString() ?: return
         val app = Watched.APPS[pkg] ?: return
