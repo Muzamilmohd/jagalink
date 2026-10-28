@@ -1,4 +1,8 @@
-# JagaLink
+# JagaPMA (Jaga Phone Mak Ayah)
+
+Formerly "JagaLink". The display name is JagaPMA, but the package/applicationId stays `com.jagalink`
+(changing it would make Android treat it as a new app and break OTA updates), as do the repo name,
+source folder and keystore file names.
 
 Android app (Kotlin, no external libraries) that protects an elderly parent from scam links.
 A small robot "bot" pops up over other apps with a Malay-language warning when a suspicious
@@ -15,7 +19,8 @@ templates next to Chinese text use `${name}`, not `$name` (Han characters count 
   `SUSPICIOUS_TLDS`, `SHORTENERS`. All checks run on-device; never send user messages anywhere.
   Adult sites (`ADULT_SITES`, `ADULT_WORDS`, `ADULT_TOKENS`, `ADULT_TLDS`) score 100 with
   `Verdict.adult = true` — hard-blocked: the bot card hides the "Buka juga" option.
-- `Watchers.kt` – `ScreenWatcher` (AccessibilityService, scans screen text + clicked views, throttled 1.5 s).
+- `Watchers.kt` – `ScreenWatcher` (AccessibilityService, scans screen text + clicked views, throttled 1.5 s). Optional in setup
+  (shown under "Pilihan" with ⚪ when off) — without it the link guard still checks every tapped link.
   There is deliberately **no** NotificationListenerService (removed in v1.4): the app must not read
   incoming messages/notifications — only what is on screen and links the user taps.
 - `LinkGuardActivity.kt` – registered as a browser. When set as default browser every tapped link
@@ -31,7 +36,7 @@ The package list in `Watched.APPS` (Support.kt) must stay in sync with
 `res/xml/accessibility_config.xml`.
 
 **Second profiles (Samsung Dual Messenger = user 95, Secure Folder = 150):** links tapped in a cloned
-WhatsApp open `LinkGuardActivity` in a *separate copy* of JagaLink in that profile — own prefs (name,
+WhatsApp open `LinkGuardActivity` in a *separate copy* of JagaPMA in that profile — own prefs (name,
 phone), often no TTS engine. Hence `Prefs.inSecondProfile()` + the "Isi nama… WhatsApp kedua" setup
 button on the card, and `Alerts.beep()` when TTS can't speak. The main-profile ScreenWatcher still
 sees the cloned app's screen. Test with `adb shell am start --user 95 -n com.jagalink/.LinkGuardActivity -d <url>`.
@@ -54,7 +59,7 @@ sees the cloned app's screen. Test with `adb shell am start --user 95 -n com.jag
 - Release key: `jagalink-release.jks` + `keystore.properties` (gitignored, must be backed up). Every OTA APK
   must be signed with it, otherwise the install fails (signature mismatch).
 - To release: bump `versionCode` + `versionName` in `app/build.gradle.kts`, `./gradlew assembleRelease`,
-  copy to `dist/JagaLink-v<ver>.apk`, then `gh release create v<ver> dist/JagaLink-v<ver>.apk --notes "..."`.
+  copy to `dist/JagaPMA-v<ver>.apk`, then `gh release create v<ver> dist/JagaPMA-v<ver>.apk --notes "..."`.
   Tag must be `v` + versionName.
 - `REQUEST_INSTALL_PACKAGES` (self-update) is not allowed on Google Play — strip it and the Updater for a Play build.
 

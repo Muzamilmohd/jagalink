@@ -44,7 +44,8 @@ class MainActivity : Activity() {
         col.addView(BotView(this, Level.SAFE), LinearLayout.LayoutParams(dp(120), dp(120)).apply {
             gravity = Gravity.CENTER_HORIZONTAL
         })
-        col.addView(label("JagaLink", 30f, bold = true, center = true))
+        col.addView(label("JagaPMA", 30f, bold = true, center = true))
+        col.addView(label("Jaga Phone Mak Ayah", 17f, bold = true, color = Color.rgb(46, 125, 50), center = true))
         col.addView(
             label(
                 tr("Bot kecil yang jaga daripada link scam", "A little bot that guards against scam links", "防范诈骗链接的小机器人"),
@@ -56,9 +57,9 @@ class MainActivity : Activity() {
             col.addView(
                 label(
                     tr(
-                        "ℹ️ Ini tetapan JagaLink untuk WhatsApp kedua (Dual Messenger). Isi nama & nombor anak di bahagian 2, kemudian tekan Simpan.",
-                        "ℹ️ These are JagaLink settings for the second WhatsApp (Dual Messenger). Fill in the name & child's number in section 2, then tap Save.",
-                        "ℹ️ 这是第二个 WhatsApp（双开）的 JagaLink 设置。请在第 2 部分填写称呼和孩子的号码，然后点击保存。",
+                        "ℹ️ Ini tetapan JagaPMA untuk WhatsApp kedua (Dual Messenger). Isi nama & nombor anak di bahagian 2, kemudian tekan Simpan.",
+                        "ℹ️ These are JagaPMA settings for the second WhatsApp (Dual Messenger). Fill in the name & child's number in section 2, then tap Save.",
+                        "ℹ️ 这是第二个 WhatsApp（双开）的 JagaPMA 设置。请在第 2 部分填写称呼和孩子的号码，然后点击保存。",
                     ),
                     15f, color = Color.rgb(25, 118, 210)
                 ).apply { setPadding(0, dp(16), 0, 0) }
@@ -88,11 +89,11 @@ class MainActivity : Activity() {
         col.addView(
             label(
                 tr(
-                    "Kalau keluar \"Tetapan terhad / Restricted setting\": buka Info Aplikasi JagaLink → ⋮ (atas kanan) → " +
+                    "Kalau keluar \"Tetapan terhad / Restricted setting\": buka Info Aplikasi JagaPMA → ⋮ (atas kanan) → " +
                         "\"Benarkan tetapan terhad\", kemudian cuba lagi.",
-                    "If you see \"Restricted setting\": open JagaLink's App info → ⋮ (top right) → " +
+                    "If you see \"Restricted setting\": open JagaPMA's App info → ⋮ (top right) → " +
                         "\"Allow restricted settings\", then try again.",
-                    "如果出现「受限设置 / Restricted setting」：打开 JagaLink 的应用信息 → ⋮（右上角）→ " +
+                    "如果出现「受限设置 / Restricted setting」：打开 JagaPMA 的应用信息 → ⋮（右上角）→ " +
                         "「允许受限设置」，然后再试一次。",
                 ),
                 13f, color = grey
@@ -213,7 +214,7 @@ class MainActivity : Activity() {
     private fun showUpdateDialog(rel: Updater.Release) {
         AlertDialog.Builder(this)
             .setTitle(tr("Versi baru ${rel.version}", "New version ${rel.version}", "新版本 ${rel.version}"))
-            .setMessage(Updater.shortNotes(rel.notes).ifBlank { tr("Ada kemas kini untuk JagaLink.", "An update for JagaLink is available.", "JagaLink 有可用更新。") })
+            .setMessage(Updater.shortNotes(rel.notes).ifBlank { tr("Ada kemas kini untuk JagaPMA.", "An update for JagaPMA is available.", "JagaPMA 有可用更新。") })
             .setPositiveButton(tr("Kemas kini", "Update", "更新")) { _, _ -> startInstall(rel) }
             .setNegativeButton(tr("Nanti", "Later", "稍后"), null)
             .show()
@@ -223,9 +224,9 @@ class MainActivity : Activity() {
         if (!Updater.canInstall(this)) {
             toast(
                 tr(
-                    "Benarkan JagaLink pasang app, kemudian tekan Kemas kini sekali lagi",
-                    "Allow JagaLink to install apps, then tap Update again",
-                    "请允许 JagaLink 安装应用，然后再点一次更新",
+                    "Benarkan JagaPMA pasang app, kemudian tekan Kemas kini sekali lagi",
+                    "Allow JagaPMA to install apps, then tap Update again",
+                    "请允许 JagaPMA 安装应用，然后再点一次更新",
                 )
             )
             startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName")))
@@ -261,12 +262,6 @@ class MainActivity : Activity() {
             startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
         }
         row(
-            tr("Baca skrin (Kebolehcapaian → JagaLink)", "Read screen (Accessibility → JagaLink)", "读取屏幕（无障碍 → JagaLink）"),
-            a11yEnabled()
-        ) {
-            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-        }
-        row(
             tr("Pengawal link (jadikan browser utama)", "Link guard (set as default browser)", "链接守卫（设为默认浏览器）"),
             isDefaultBrowser()
         ) { requestBrowserRole() }
@@ -283,6 +278,27 @@ class MainActivity : Activity() {
             val ok = checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
             row(tr("Notifikasi amaran", "Warning notifications", "警告通知"), ok) { requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1) }
         }
+
+        // Pilihan — tanpa ni, bot masih semak setiap link yang ditekan (pengawal link)
+        statusBox.addView(label(tr("Pilihan", "Optional", "可选"), 15f, bold = true, color = grey).apply {
+            setPadding(0, dp(14), 0, 0)
+        })
+        row(
+            tr("Baca skrin (Kebolehcapaian → JagaPMA)", "Read screen (Accessibility → JagaPMA)", "读取屏幕（无障碍 → JagaPMA）"),
+            a11yEnabled(), optional = true
+        ) {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+        statusBox.addView(
+            label(
+                tr(
+                    "Bot keluar sebaik link scam atau fail APK nampak di skrin, sebelum ditekan. Tanpa ni, bot tetap semak setiap link yang ditekan.",
+                    "The bot warns as soon as a scam link or APK file shows on screen, before it's tapped. Without it, the bot still checks every link that is tapped.",
+                    "诈骗链接或 APK 文件一出现在屏幕上，机器人就会提醒，不用等点击。不开启的话，机器人仍会检查每个被点击的链接。",
+                ),
+                13f, color = grey
+            )
+        )
     }
 
     private fun a11yEnabled(): Boolean =
@@ -324,7 +340,7 @@ class MainActivity : Activity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 2 && !isDefaultBrowser()) {
             // Kalau dialog tak keluar (pernah ditolak), buka tetapan app lalai terus
-            toast(tr("Pilih JagaLink sebagai 'Aplikasi pelayar'", "Choose JagaLink as the 'Browser app'", "请选择 JagaLink 作为「浏览器应用」"))
+            toast(tr("Pilih JagaPMA sebagai 'Aplikasi pelayar'", "Choose JagaPMA as the 'Browser app'", "请选择 JagaPMA 作为「浏览器应用」"))
             startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
         }
     }
@@ -354,14 +370,19 @@ class MainActivity : Activity() {
 
     // ------------------------------------------------------------ ui helpers
 
-    private fun row(title: String, ok: Boolean, onFix: () -> Unit) {
+    private fun row(title: String, ok: Boolean, optional: Boolean = false, onFix: () -> Unit) {
         val r = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, dp(6), 0, dp(6))
         }
+        val icon = when {
+            ok -> "✅  "
+            optional -> "⚪  "
+            else -> "❌  "
+        }
         r.addView(
-            label((if (ok) "✅  " else "❌  ") + title, 16f),
+            label(icon + title, 16f),
             LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f)
         )
         if (!ok) r.addView(Button(this).apply { text = tr("Hidupkan", "Turn on", "开启"); setOnClickListener { onFix() } })

@@ -45,7 +45,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Pengawal link: bila JagaLink jadi browser utama, semua link yang
+        <!-- Pengawal link: bila JagaPMA jadi browser utama, semua link yang
              ditekan dalam WhatsApp/SMS/FB lalu sini dulu untuk disemak. -->
         <activity
             android:name=".LinkGuardActivity"

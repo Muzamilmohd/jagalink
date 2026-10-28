@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="a11y_label">JagaLink – 屏幕守卫</string>
-    <string name="a11y_desc">JagaLink 会读取 WhatsApp、Telegram、短信、Facebook 和电邮屏幕上显示的文字来发现诈骗链接，然后显示警告机器人。资料不会发送到任何地方——全部在这部手机里检查。</string>
+    <string name="a11y_label">JagaPMA – 屏幕守卫</string>
+    <string name="a11y_desc">JagaPMA 会读取 WhatsApp、Telegram、短信、Facebook 和电邮屏幕上显示的文字来发现诈骗链接，然后显示警告机器人。资料不会发送到任何地方——全部在这部手机里检查。</string>
 </resources>

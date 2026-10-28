@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 
 /**
- * Bila JagaLink jadi browser utama, SETIAP link yang mak tekan (WhatsApp, SMS, FB…)
+ * Bila JagaPMA jadi browser utama, SETIAP link yang mak tekan (WhatsApp, SMS, FB…)
  * masuk sini dulu. Selamat → terus buka di Chrome. Mencurigakan → bot keluar.
  */
 class LinkGuardActivity : Activity() {

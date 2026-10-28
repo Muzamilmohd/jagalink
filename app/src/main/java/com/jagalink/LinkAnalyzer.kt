@@ -209,9 +209,9 @@ object LinkAnalyzer {
                 url, host, 100,
                 listOf(
                     lang.t(
-                        "Laman ni ada kandungan lucah. JagaLink dah sekat link ni.",
-                        "This site has pornographic content. JagaLink has blocked this link.",
-                        "这个网站含有色情内容。JagaLink 已拦截此链接。",
+                        "Laman ni ada kandungan lucah. JagaPMA dah sekat link ni.",
+                        "This site has pornographic content. JagaPMA has blocked this link.",
+                        "这个网站含有色情内容。JagaPMA 已拦截此链接。",
                     )
                 ),
                 adult = true,

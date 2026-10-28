@@ -53,7 +53,7 @@ object Prefs {
 
     /**
      * True dalam profil kedua (cth Dual Messenger Samsung, user 95). App dalam profil tu
-     * buka link guna salinan JagaLink yang berasingan — tetapan pun berasingan.
+     * buka link guna salinan JagaPMA yang berasingan — tetapan pun berasingan.
      */
     fun inSecondProfile(): Boolean = android.os.Process.myUid() / 100_000 != 0
     fun save(c: Context, name: String, phone: String, voice: Boolean) {
@@ -241,9 +241,9 @@ object AskChild {
         }
         val link = v.url
         return ctx.tr(
-            "Hai, $name dapat link ni$where. JagaLink kata ia $what. Boleh tolong semak? 🙏\n\n$link",
-            "Hi, $name got this link$where. JagaLink says it's $what. Can you check it? 🙏\n\n$link",
-            "你好，${name}${where}收到这个链接。JagaLink 说它$what。可以帮忙看看吗？🙏\n\n$link",
+            "Hai, $name dapat link ni$where. JagaPMA kata ia $what. Boleh tolong semak? 🙏\n\n$link",
+            "Hi, $name got this link$where. JagaPMA says it's $what. Can you check it? 🙏\n\n$link",
+            "你好，${name}${where}收到这个链接。JagaPMA 说它$what。可以帮忙看看吗？🙏\n\n$link",
         )
     }
 

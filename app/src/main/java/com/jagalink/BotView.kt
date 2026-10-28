@@ -10,7 +10,7 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 
 /**
- * Bot kecil JagaLink — dilukis terus (tiada gambar), melambai & berkelip.
+ * Bot kecil JagaPMA — dilukis terus (tiada gambar), melambai & berkelip.
  * Merah = bahaya, oren = mencurigakan, hijau = selamat.
  */
 class BotView(context: Context, var mood: Level = Level.DANGER) : View(context) {

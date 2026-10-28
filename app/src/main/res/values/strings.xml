@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">JagaLink</string>
-    <string name="a11y_label">JagaLink – Pengawal Skrin</string>
-    <string name="a11y_desc">JagaLink membaca teks yang nampak di skrin dalam WhatsApp, Telegram, SMS, Facebook dan emel untuk mengesan link scam, lalu keluarkan bot amaran. Data tidak dihantar ke mana-mana — semua disemak dalam telefon ini.</string>
+    <string name="app_name">JagaPMA</string>
+    <string name="a11y_label">JagaPMA – Pengawal Skrin</string>
+    <string name="a11y_desc">JagaPMA membaca teks yang nampak di skrin dalam WhatsApp, Telegram, SMS, Facebook dan emel untuk mengesan link scam, lalu keluarkan bot amaran. Data tidak dihantar ke mana-mana — semua disemak dalam telefon ini.</string>
 </resources>

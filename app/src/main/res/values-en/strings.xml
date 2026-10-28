@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="a11y_label">JagaLink – Screen Guard</string>
-    <string name="a11y_desc">JagaLink reads the text shown on screen in WhatsApp, Telegram, SMS, Facebook and email to spot scam links, then shows a warning bot. No data is sent anywhere — everything is checked on this phone.</string>
+    <string name="a11y_label">JagaPMA – Screen Guard</string>
+    <string name="a11y_desc">JagaPMA reads the text shown on screen in WhatsApp, Telegram, SMS, Facebook and email to spot scam links, then shows a warning bot. No data is sent anywhere — everything is checked on this phone.</string>
 </resources>
