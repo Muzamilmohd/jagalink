@@ -30,7 +30,7 @@ templates next to Chinese text use `${name}`, not `$name` (Han characters count 
 - `LinkGuardActivity.kt` – registered as a browser. When set as default browser every tapped link
   passes through it: SAFE → forwarded to the real browser (`Browsers.pick`), else bot screen.
 - `SafeBrowsing.kt` + `UrlHashes.kt` (github flavor only) – Google Safe Browsing v5 `hashes:search`: canonical URL
-  expressions → SHA-256 → send 4-byte prefixes only (`$alt=json` required, else protobuf reply), match full hashes
+  expressions → SHA-256 → send 4-byte prefixes only (v5 replies protobuf only — `$alt=json` gives "Unsupported Output Format"; parsed by hand in `UrlHashes.parseSearchResponse`), match full hashes
   on-device. Runs in LinkGuardActivity for non-DANGER taps, 2.5 s timeout, fails open to local verdict. API key from
   `local.properties` `safeBrowsing.apiKey` (gitignored) → `BuildConfig.SB_KEY`; empty = feature hidden. Toggle
   `Prefs.safeBrowsing`. Free Safe Browsing API is non-commercial; selling the app needs Google Web Risk instead.

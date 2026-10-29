@@ -26,6 +26,99 @@ object UrlHashes {
 
     fun prefixBase64(fullHash: ByteArray): String = Base64.getEncoder().encodeToString(fullHash.copyOf(4))
 
+    // ---------------------------------------------------------------- jawapan Google (protobuf)
+
+    class SearchResult(val hits: Map<String, String>, val cacheSeconds: Long)
+
+    private val THREATS = mapOf(
+        1 to "MALWARE", 2 to "SOCIAL_ENGINEERING", 3 to "UNWANTED_SOFTWARE", 4 to "POTENTIALLY_HARMFUL_APPLICATION",
+    )
+
+    /**
+     * Baca SearchHashesResponse (v5 hanya balas protobuf; JSON tak disokong):
+     *   1: repeated FullHash { 1: bytes full_hash, 2: repeated FullHashDetail { 1: enum threat_type } }
+     *   2: Duration cache_duration { 1: int64 seconds }
+     * Pulangkan peta base64(full hash) → jenis ancaman.
+     */
+    fun parseSearchResponse(b: ByteArray): SearchResult {
+        val hits = HashMap<String, String>()
+        var cache = 300L
+        Pb(b, 0, b.size).forEach { f, r ->
+            when (f) {
+                1 -> {
+                    var hash: ByteArray? = null
+                    var threat: String? = null
+                    r.message().forEach { f2, r2 ->
+                        when (f2) {
+                            1 -> hash = r2.bytes()
+                            2 -> r2.message().forEach { f3, r3 ->
+                                if (f3 == 1) {
+                                    val t = r3.varint().toInt()
+                                    if (threat == null) threat = THREATS[t] ?: "THREAT_$t"
+                                } else r3.skip()
+                            }
+                            else -> r2.skip()
+                        }
+                    }
+                    val h = hash
+                    val t = threat
+                    if (h != null && t != null) hits[Base64.getEncoder().encodeToString(h)] = t
+                }
+                2 -> r.message().forEach { f2, r2 -> if (f2 == 1) cache = r2.varint() else r2.skip() }
+                else -> r.skip()
+            }
+        }
+        return SearchResult(hits, cache)
+    }
+
+    /** Pembaca protobuf minimum (tanpa library). */
+    private class Pb(val b: ByteArray, var p: Int, val end: Int) {
+        private var wire = 0
+
+        fun forEach(each: (field: Int, r: Pb) -> Unit) {
+            while (p < end) {
+                val tag = varint().toInt()
+                wire = tag and 7
+                each(tag ushr 3, this)
+            }
+        }
+
+        fun varint(): Long {
+            var shift = 0
+            var out = 0L
+            while (p < end) {
+                val x = b[p++].toInt() and 0xFF
+                out = out or ((x and 0x7F).toLong() shl shift)
+                if (x and 0x80 == 0) return out
+                shift += 7
+                if (shift > 63) break
+            }
+            throw IllegalArgumentException("protobuf varint rosak")
+        }
+
+        fun bytes(): ByteArray {
+            val n = varint().toInt()
+            require(n >= 0 && p + n <= end) { "protobuf panjang rosak" }
+            return b.copyOfRange(p, p + n).also { p += n }
+        }
+
+        fun message(): Pb {
+            val n = varint().toInt()
+            require(n >= 0 && p + n <= end) { "protobuf panjang rosak" }
+            return Pb(b, p, p + n).also { p += n }
+        }
+
+        fun skip() {
+            when (wire) {
+                0 -> varint()
+                1 -> p += 8
+                2 -> p += varint().toInt()
+                5 -> p += 4
+                else -> throw IllegalArgumentException("protobuf wire type $wire")
+            }
+        }
+    }
+
     // ---------------------------------------------------------------- canonicalize
 
     class Canonical(val host: String, val path: String, val query: String?)

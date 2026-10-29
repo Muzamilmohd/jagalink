@@ -3,7 +3,6 @@ package com.jagalink
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -66,8 +65,8 @@ object SafeBrowsing {
     private class Fetched(val hits: Map<String, String>, val cacheMs: Long)
 
     private fun fetch(ctx: Context, prefixes: List<String>, timeoutMs: Int): Fetched {
-        // $alt=json wajib — tanpa ni Google balas dalam format protobuf (binari)
-        val q = StringBuilder("?\$alt=json&key=").append(URLEncoder.encode(BuildConfig.SB_KEY, "UTF-8"))
+        // v5 hanya balas protobuf untuk permintaan sah ($alt=json → "Unsupported Output Format")
+        val q = StringBuilder("?key=").append(URLEncoder.encode(BuildConfig.SB_KEY, "UTF-8"))
         for (p in prefixes) q.append("&hashPrefixes=").append(URLEncoder.encode(p, "UTF-8"))
         val conn = URL(ENDPOINT + q).openConnection() as HttpURLConnection
         conn.connectTimeout = timeoutMs
@@ -77,19 +76,8 @@ object SafeBrowsing {
         signingSha1(ctx)?.let { conn.setRequestProperty("X-Android-Cert", it) }
         try {
             if (conn.responseCode != 200) throw IllegalStateException("Safe Browsing HTTP ${conn.responseCode}")
-            val json = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
-            val hits = HashMap<String, String>()
-            val arr = json.optJSONArray("fullHashes")
-            if (arr != null) for (i in 0 until arr.length()) {
-                val fh = arr.getJSONObject(i)
-                val details = fh.optJSONArray("fullHashDetails") ?: continue
-                val type = (0 until details.length())
-                    .map { details.getJSONObject(it).optString("threatType") }
-                    .firstOrNull { it.isNotBlank() } ?: continue
-                hits[fh.getString("fullHash")] = type
-            }
-            val secs = json.optString("cacheDuration", "300s").removeSuffix("s").toDoubleOrNull() ?: 300.0
-            return Fetched(hits, (secs * 1000).toLong().coerceIn(60_000, 3_600_000))
+            val r = UrlHashes.parseSearchResponse(conn.inputStream.use { it.readBytes() })
+            return Fetched(r.hits, (r.cacheSeconds * 1000).coerceIn(60_000, 3_600_000))
         } finally {
             conn.disconnect()
         }
