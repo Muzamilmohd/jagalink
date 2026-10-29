@@ -2,7 +2,7 @@
 
 **🇲🇾 Bahasa Melayu** · [🇬🇧 English](#-english)
 
-*Kemas kini terakhir: 28 Oktober 2026*
+*Kemas kini terakhir: 29 Oktober 2026*
 
 JagaPMA (Jaga Phone Mak Ayah) ialah app yang memberi amaran tentang link scam, fail APK dan laman lucah. Polisi ini menerangkan data yang digunakan oleh app.
 
@@ -24,6 +24,7 @@ Bila anda tekan **"Hantar link ke anak"**, app membuka WhatsApp (atau SMS) denga
 ## Internet
 - **Versi Google Play:** tiada kebenaran internet langsung.
 - **Versi GitHub:** hanya menyemak versi baru dan memuat turun fail kemas kini dari GitHub (`api.github.com`, `github.com`). Tiada data peribadi dihantar.
+- **Versi GitHub — Google Safe Browsing (boleh dimatikan dalam Tetapan):** bila anda tekan link, app menghantar **4 bait pertama cap jari SHA-256 (hash)** link tersebut ke Google (`safebrowsing.googleapis.com`) untuk semak virus dan penipuan. Link penuh **tidak** dihantar dan Google tidak boleh tahu link sebenar daripada cap jari ini. Padanan dibuat dalam telefon. Tertakluk kepada [Polisi Privasi Google](https://policies.google.com/privacy).
 
 ## Pihak ketiga
 Tiada iklan, tiada analitik, tiada SDK pihak ketiga.
@@ -38,7 +39,7 @@ Muzamil Mohd — buka isu di https://github.com/Muzamilmohd/jagalink/issues
 
 ## 🇬🇧 English
 
-*Last updated: 28 October 2026*
+*Last updated: 29 October 2026*
 
 JagaPMA (Jaga Phone Mak Ayah) is an app that warns about scam links, APK files and adult sites. This policy explains what data the app uses.
 
@@ -60,6 +61,7 @@ When you tap **"Send link to my child"**, the app opens WhatsApp (or SMS) with a
 ### Internet
 - **Google Play version:** no internet permission at all.
 - **GitHub version:** only checks for new versions and downloads update files from GitHub (`api.github.com`, `github.com`). No personal data is sent.
+- **GitHub version — Google Safe Browsing (can be turned off in Settings):** when you tap a link, the app sends **the first 4 bytes of the link's SHA-256 fingerprint (hash)** to Google (`safebrowsing.googleapis.com`) to check for malware and scams. The full link is **never** sent, and Google cannot work out the real link from this fingerprint. Matching happens on the phone. Subject to [Google's Privacy Policy](https://policies.google.com/privacy).
 
 ### Third parties
 No ads, no analytics, no third-party SDKs.

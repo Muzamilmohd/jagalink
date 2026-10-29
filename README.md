@@ -9,14 +9,14 @@ Bot kecil yang keluar atas skrin bila ada link mencurigakan dalam WhatsApp, Tele
 ## Apa yang dikesan
 - **Fail APK** (kad jemputan kahwin palsu, "resit", "saman") — sama ada link `.apk` atau fail yang dihantar dalam chat
 - **Huruf pelik / huruf asing** yang menyamar (cth `аpple.com` guna huruf Cyrillic, kod `xn--`)
-- **Laman tiruan jenama**: Maybank, CIMB, Public Bank, Bank Islam, BSN, LHDN, KWSP, JPJ, PDRM, Pos Laju, J&T, Shopee, Lazada, TNB, Touch 'n Go dll — termasuk ejaan tipu (`rnaybank`, `shoppe`, `m4ybank`)
+- **Laman tiruan bank & jenama** — 21 bank, 5 bank digital (GXBank, Boost, AEON, KAF, Ryt), e-wallet (Touch 'n Go, BigPay, ShopeePay), DuitNow/FPX, LHDN, KWSP, JPJ, PDRM, Pos Laju, J&T, Shopee, Lazada, TNB dll — termasuk **ejaan tipu** seperti `meybank2u`, `meybenk2u`, `cimbclick`, `rnaybank`, `m4ybank`. Senarai laman rasmi disahkan satu per satu.
 - **Link dipendekkan** (bit.ly, tinyurl, s.id…)
 - **Hujung alamat murah** yang selalu dipakai scam (.xyz .top .online .icu .click …)
 - **Link nombor IP**, simbol `@` tersorok, tiada https, alamat berselirat
 - **Ayat scam** dalam mesej/emel (menang hadiah, akaun disekat, sahkan segera, bungkusan tertahan, OTP…) — BM, English & 中文
 - **Laman lucah** — disekat terus, tiada pilihan "buka juga"
 
-Semua semakan dibuat **dalam telefon**. Tiada mesej atau link dihantar ke mana-mana. Internet hanya digunakan untuk semak versi baru di GitHub.
+Semua semakan dibuat **dalam telefon**. Tiada mesej atau link dihantar ke mana-mana. Internet hanya digunakan untuk semak versi baru di GitHub dan *(versi GitHub, boleh dimatikan)* semak link yang ditekan dengan **Google Safe Browsing** — hanya cap jari ringkas (hash) dihantar, bukan link penuh.
 
 **Bahasa:** Melayu, English, 中文 (pilih dalam app). **Sokong** WhatsApp kedua (Samsung Dual Messenger).
 
@@ -118,7 +118,7 @@ Semua senarai ada dalam `app/src/main/java/com/jagalink/LinkAnalyzer.kt`:
 
 **JagaPMA** (*Jaga Phone Mak Ayah* — "guard Mum & Dad's phone") is a small robot that pops up over other apps to warn an elderly parent when a suspicious link or APK file appears in WhatsApp, Telegram, SMS, Facebook, Instagram, TikTok or email — or when they tap one. It detects fake bank/government/delivery sites (Maybank, CIMB, LHDN, Pos Laju, Shopee…), look-alike letters, shortened links, cheap scam domains, scam phrases (Malay, English, Chinese) and APK files, and **blocks adult sites**.
 
-All checks run **on the phone**. No messages or links are sent anywhere — the internet is only used to check GitHub for new versions. JagaPMA does **not** read incoming messages or notifications — it only checks text shown on screen and links that are tapped. App language: Malay, English or 中文 (choose in the app).
+All checks run **on the phone**. No messages or links are sent anywhere — the internet is only used to check GitHub for new versions and *(GitHub version, can be turned off)* to check tapped links with **Google Safe Browsing**, sending only a short hash prefix, never the full link. JagaPMA does **not** read incoming messages or notifications — it only checks text shown on screen and links that are tapped. App language: Malay, English or 中文 (choose in the app).
 
 ### 📥 How to install
 

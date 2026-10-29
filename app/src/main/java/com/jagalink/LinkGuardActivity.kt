@@ -2,8 +2,10 @@ package com.jagalink
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.widget.Toast
 
 /**
@@ -20,6 +22,41 @@ class LinkGuardActivity : Activity() {
             return
         }
         val v = LinkAnalyzer.analyzeUrl(uri.toString(), lang = Prefs.lang(this))
+        // Dah pasti bahaya, atau semakan Google dimatikan → terus guna keputusan dalam phone
+        if (v.level == Level.DANGER || !SafeBrowsing.enabled(this)) {
+            decide(uri, v)
+            return
+        }
+        // Tanya Google Safe Browsing (hash sahaja). Tunjuk "sedang semak" kalau lambat.
+        val waiting = Runnable {
+            setContentView(
+                BotUi.text(this, tr("🔍 Sedang semak link…", "🔍 Checking link…", "🔍 正在检查链接…"), 20f, Color.WHITE)
+                    .apply { setBackgroundColor(Color.argb(170, 0, 0, 0)) }
+            )
+        }
+        val main = Handler(mainLooper)
+        main.postDelayed(waiting, 400)
+        Thread {
+            val threat = SafeBrowsing.check(this, uri.toString())
+            runOnUiThread {
+                main.removeCallbacks(waiting)
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (threat == null) {
+                    decide(uri, v)
+                } else {
+                    val why = tr(
+                        "Google Safe Browsing kenal pasti ni sebagai ${SafeBrowsing.describe(this, threat)}.",
+                        "Google Safe Browsing flags this as ${SafeBrowsing.describe(this, threat)}.",
+                        "Google 安全浏览将其识别为${SafeBrowsing.describe(this, threat)}。",
+                    )
+                    decide(uri, Verdict(v.url, v.host, 100, listOf(why) + v.reasons))
+                }
+            }
+        }.start()
+    }
+
+    /** Selamat → buka browser sebenar. Lain → kad amaran bot. */
+    private fun decide(uri: Uri, v: Verdict) {
         if (v.level == Level.SAFE) {
             openInRealBrowser(uri)
             finish()

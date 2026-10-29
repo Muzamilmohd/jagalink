@@ -139,6 +139,24 @@ class MainActivity : Activity() {
         )
         col.addView(phoneEt)
         col.addView(voiceSw)
+        if (SafeBrowsing.available()) {
+            col.addView(Switch(this).apply {
+                text = tr("Semak juga dengan Google Safe Browsing", "Also check with Google Safe Browsing", "同时用 Google 安全浏览检查")
+                textSize = 16f
+                isChecked = Prefs.safeBrowsing(this@MainActivity)
+                setOnCheckedChangeListener { _, on -> Prefs.setSafeBrowsing(this@MainActivity, on) }
+            })
+            col.addView(
+                label(
+                    tr(
+                        "Bila link ditekan, cap jari ringkas (hash) link dihantar ke Google untuk semak virus & penipuan — bukan link penuh. Perlu internet.",
+                        "When a link is tapped, a short fingerprint (hash) of it is sent to Google to check for malware & scams — never the full link. Needs internet.",
+                        "点击链接时，只会把链接的简短指纹（哈希）发送给 Google 检查病毒和诈骗——不会发送完整链接。需要网络。",
+                    ),
+                    13f, color = grey
+                )
+            )
+        }
         col.addView(button(tr("Simpan", "Save", "保存")) {
             Prefs.save(this, nameEt.text.toString(), phoneEt.text.toString(), voiceSw.isChecked)
             toast(tr("Disimpan 👍", "Saved 👍", "已保存 👍"))

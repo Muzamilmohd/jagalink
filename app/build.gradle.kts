@@ -5,6 +5,12 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// API key Google Safe Browsing — dalam local.properties (tidak masuk git): safeBrowsing.apiKey=...
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
 // Kunci tandatangan release (tidak masuk git). Semua APK update mesti guna kunci yang sama.
 val keystoreProps = Properties().apply {
     val f = rootProject.file("keystore.properties")
@@ -38,11 +44,13 @@ android {
             val repo = (project.findProperty("jagalink.updateRepo") as String?).orEmpty()
             buildConfigField("String", "UPDATE_REPO", "\"$repo\"")
             buildConfigField("boolean", "PLAY", "false")
+            buildConfigField("String", "SB_KEY", "\"${localProps.getProperty("safeBrowsing.apiKey", "")}\"")
         }
         create("play") {
             dimension = "store"
             buildConfigField("String", "UPDATE_REPO", "\"\"")
             buildConfigField("boolean", "PLAY", "true")
+            buildConfigField("String", "SB_KEY", "\"\"") // versi Play tiada internet
         }
     }
 

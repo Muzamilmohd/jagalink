@@ -38,6 +38,11 @@ object Prefs {
     fun voice(c: Context): Boolean = sp(c).getBoolean("voice", true)
     fun isSetUp(c: Context): Boolean = sp(c).contains("name")
 
+    fun safeBrowsing(c: Context): Boolean = sp(c).getBoolean("safe_browsing", true)
+    fun setSafeBrowsing(c: Context, on: Boolean) {
+        sp(c).edit().putBoolean("safe_browsing", on).apply()
+    }
+
     fun autoUpdate(c: Context): Boolean = sp(c).getBoolean("auto_update", true)
     fun setAutoUpdate(c: Context, on: Boolean) {
         sp(c).edit().putBoolean("auto_update", on).apply()

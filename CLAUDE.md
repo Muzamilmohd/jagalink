@@ -17,6 +17,10 @@ templates next to Chinese text use `${name}`, not `$name` (Han characters count 
 - `LinkAnalyzer.kt` – pure-Kotlin rule engine (no Android imports). Scores links 0–100:
   >=60 DANGER, >=30 WARN. Lists to extend: `BRANDS`, `TRUSTED`, `SCAM_WORDS`,
   `SUSPICIOUS_TLDS`, `SHORTENERS`. All checks run on-device; never send user messages anywhere.
+  Brands carry `keywords` (brand + official domain labels) and a `Kind`: BANK look-alikes → DANGER, OTHER → WARN,
+  SOCIAL exact only; near match = 1 edit, or 2 substitutions with same first letter; `EXACT_ONLY` for keywords
+  close to common words. Only add official domains verified to exist (HTTPS/DNS) — an unregistered whitelisted
+  domain could be bought by a scammer. Look-alike suite: 71 cases (scratch test, re-create when changing rules).
   Adult sites (`ADULT_SITES`, `ADULT_WORDS`, `ADULT_TOKENS`, `ADULT_TLDS`) score 100 with
   `Verdict.adult = true` — hard-blocked: the bot card hides the "Buka juga" option.
 - `Watchers.kt` – `ScreenWatcher` (AccessibilityService, scans screen text + clicked views, throttled 1.5 s). Optional in setup
@@ -25,6 +29,11 @@ templates next to Chinese text use `${name}`, not `$name` (Han characters count 
   incoming messages/notifications — only what is on screen and links the user taps.
 - `LinkGuardActivity.kt` – registered as a browser. When set as default browser every tapped link
   passes through it: SAFE → forwarded to the real browser (`Browsers.pick`), else bot screen.
+- `SafeBrowsing.kt` + `UrlHashes.kt` (github flavor only) – Google Safe Browsing v5 `hashes:search`: canonical URL
+  expressions → SHA-256 → send 4-byte prefixes only (`$alt=json` required, else protobuf reply), match full hashes
+  on-device. Runs in LinkGuardActivity for non-DANGER taps, 2.5 s timeout, fails open to local verdict. API key from
+  `local.properties` `safeBrowsing.apiKey` (gitignored) → `BuildConfig.SB_KEY`; empty = feature hidden. Toggle
+  `Prefs.safeBrowsing`. Free Safe Browsing API is non-commercial; selling the app needs Google Web Risk instead.
 - `BotOverlay.kt` – `WarnCenter` (dedupe per URL/source), `BotOverlay` (TYPE_APPLICATION_OVERLAY
   window), `BotUi` (shared warning card).
 - `BotView.kt` – animated robot drawn on Canvas (100×100 design grid).
