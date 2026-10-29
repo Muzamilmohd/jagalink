@@ -37,6 +37,14 @@ templates next to Chinese text use `${name}`, not `$name` (Han characters count 
   on-device. Runs in LinkGuardActivity for non-DANGER taps, 2.5 s timeout, fails open to local verdict. API key from
   `local.properties` `safeBrowsing.apiKey` (gitignored) → `BuildConfig.SB_KEY`; empty = feature hidden. Toggle
   `Prefs.safeBrowsing`. Free Safe Browsing API is non-commercial; selling the app needs Google Web Risk instead.
+- `Blocklist.kt` – scam domains from `blocklist/domains.txt` (repo root): bundled as an asset (assets srcDir) for both
+  flavors, and re-downloaded daily by `UpdateJob` from raw.githubusercontent (github flavor) → `LinkAnalyzer.extraBlocked`.
+  Add confirmed scam domains there, push, and phones pick them up within 24 h. Test domain: `jagapma-ujian-scam.example`.
+- `ShortLinks.kt` (github) – expands bit.ly etc. in LinkGuardActivity by following `Location` headers only while the
+  host is still a shortener (destination never contacted); then the real URL goes through all checks.
+- `Health.kt` – daily `HealthJob` (both flavors; Play keeps RECEIVE_BOOT_COMPLETED): notifies if the default-browser
+  role was lost, only after it was once held (`Prefs.guardWasOn`). `isDefaultBrowser` lives here.
+- MainActivity setup: `steps()` drives both the checklist rows and the one-step-at-a-time guide card.
 - `BotOverlay.kt` – `WarnCenter` (dedupe per URL/source), `BotOverlay` (TYPE_APPLICATION_OVERLAY
   window), `BotUi` (shared warning card).
 - `BotView.kt` – animated robot drawn on Canvas (100×100 design grid).

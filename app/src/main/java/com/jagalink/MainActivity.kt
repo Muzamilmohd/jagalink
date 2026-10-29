@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -15,6 +16,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.text.InputType
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
@@ -31,11 +33,16 @@ class MainActivity : Activity() {
 
     private lateinit var statusBox: LinearLayout
     private lateinit var resultText: TextView
+    private var scrollView: ScrollView? = null
+    private var nameField: EditText? = null
     private val grey = Color.rgb(97, 97, 97)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Blocklist.ensureLoaded(this)
+        Blocklist.refreshIfStale(this)
         val scroll = ScrollView(this)
+        scrollView = scroll
         val col = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(20), dp(24), dp(20), dp(48))
@@ -112,6 +119,7 @@ class MainActivity : Activity() {
 
         col.addView(header(tr("2. Tetapan", "2. Settings", "2. 设置")))
         val nameEt = edit(tr("Panggilan (cth: Mak)", "What to call them (e.g. Mum)", "称呼（例如：妈妈）"), Prefs.callName(this))
+        nameField = nameEt
         val phoneEt = edit(
             tr("Nombor telefon anak", "Child's phone number", "孩子的电话号码"),
             Prefs.phone(this), InputType.TYPE_CLASS_PHONE
@@ -160,6 +168,7 @@ class MainActivity : Activity() {
         col.addView(button(tr("Simpan", "Save", "保存")) {
             Prefs.save(this, nameEt.text.toString(), phoneEt.text.toString(), voiceSw.isChecked)
             toast(tr("Disimpan 👍", "Saved 👍", "已保存 👍"))
+            refreshStatus()
         })
 
         col.addView(header(tr("3. Uji", "3. Test", "3. 测试")))
@@ -285,40 +294,127 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         refreshStatus()
+        Health.schedule(this)
+        Health.check(this) // padam amaran "tak aktif" bila dah dibetulkan
     }
 
     // ------------------------------------------------------------ status
 
+    /** Satu langkah setup wajib — dipakai oleh panduan langkah demi langkah dan senarai semak. */
+    private class Step(val row: String, val title: String, val why: String, val done: Boolean, val action: () -> Unit)
+
+    private fun steps(): List<Step> {
+        val list = mutableListOf<Step>()
+        if (!BuildConfig.PLAY) list += Step(
+            tr("Pop-up bot atas skrin", "Bot pop-up on screen", "屏幕上的机器人弹窗"),
+            tr("Benarkan pop-up bot", "Allow the bot pop-up", "允许机器人弹窗"),
+            tr(
+                "Supaya bot boleh keluar di atas WhatsApp dan app lain bila ada link bahaya.",
+                "So the bot can appear over WhatsApp and other apps when there's a dangerous link.",
+                "这样当出现危险链接时，机器人可以显示在 WhatsApp 和其他应用上方。",
+            ),
+            Settings.canDrawOverlays(this),
+        ) { startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))) }
+        list += Step(
+            tr("Pengawal link (jadikan browser utama)", "Link guard (set as default browser)", "链接守卫（设为默认浏览器）"),
+            tr("Jadikan JagaPMA browser utama", "Make JagaPMA the default browser", "把 JagaPMA 设为默认浏览器"),
+            tr(
+                "Ini perlindungan utama — setiap link yang ditekan disemak dulu. Link selamat tetap dibuka dalam Chrome. Pilih JagaPMA bila ditanya.",
+                "This is the main protection — every tapped link is checked first. Safe links still open in Chrome. Choose JagaPMA when asked.",
+                "这是主要保护——每个被点击的链接都会先检查。安全的链接仍会在 Chrome 中打开。被询问时请选择 JagaPMA。",
+            ),
+            isDefaultBrowser(),
+        ) { requestBrowserRole() }
+        list += Step(
+            tr("Jangan dimatikan di latar belakang", "Keep running in the background", "保持在后台运行"),
+            tr("Jangan biar phone tutup JagaPMA", "Don't let the phone close JagaPMA", "不要让手机关闭 JagaPMA"),
+            tr(
+                "Supaya JagaPMA terus berjaga walaupun lama tak dibuka. Pilih \"Benarkan\" atau \"Tidak dioptimumkan\".",
+                "So JagaPMA keeps guarding even if it isn't opened for a long time. Choose \"Allow\" or \"Not optimised\".",
+                "这样即使很久没打开，JagaPMA 也会持续守护。请选择「允许」或「不优化」。",
+            ),
+            ignoringBattery(),
+        ) { openBatterySettings() }
+        if (Build.VERSION.SDK_INT >= 33) list += Step(
+            tr("Notifikasi amaran", "Warning notifications", "警告通知"),
+            tr("Benarkan notifikasi", "Allow notifications", "允许通知"),
+            tr(
+                "Untuk amaran penting, contohnya bila perlindungan terputus.",
+                "For important alerts, for example when protection gets switched off.",
+                "用于重要提醒，例如保护被关闭时。",
+            ),
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED,
+        ) { requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1) }
+        list += Step(
+            "",
+            tr("Isi nama & nombor anak", "Enter the name & your number", "填写称呼和孩子的号码"),
+            tr(
+                "Supaya bot panggil nama yang betul, dan boleh hantar link mencurigakan kepada anak untuk disemak. Isi di bahagian 2, kemudian tekan Simpan.",
+                "So the bot uses the right name and can send suspicious links to you to check. Fill in section 2, then tap Save.",
+                "这样机器人会用正确的称呼，并能把可疑链接发给孩子检查。请填写第 2 部分，然后点击保存。",
+            ),
+            Prefs.isSetUp(this) && Prefs.phone(this).isNotBlank(),
+        ) { nameField?.let { f -> scrollView?.post { scrollView?.smoothScrollTo(0, f.top - dp(80)); f.requestFocus() } } }
+        return list
+    }
+
+    private fun openBatterySettings() {
+        // Versi Play tiada kebenaran REQUEST_IGNORE_BATTERY_OPTIMIZATIONS — buka senarai tetapan sahaja
+        try {
+            if (BuildConfig.PLAY) {
+                toast(tr("Cari JagaPMA → pilih \"Tidak dioptimumkan\"", "Find JagaPMA → choose \"Not optimised\"", "找到 JagaPMA → 选择「不优化」"))
+                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            } else {
+                startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName")))
+            }
+        } catch (_: Exception) {
+            startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+        }
+    }
+
+    /** Kad besar di atas: satu langkah pada satu masa, atau "semua siap". */
+    private fun guideCard(steps: List<Step>): View {
+        val next = steps.indexOfFirst { !it.done }
+        val doneAll = next < 0
+        val accent = if (doneAll) Color.rgb(46, 125, 50) else Color.rgb(25, 118, 210)
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(16), dp(18), dp(16))
+            background = GradientDrawable().apply {
+                setColor(if (doneAll) Color.rgb(232, 245, 233) else Color.rgb(227, 242, 253))
+                cornerRadius = dp(18).toFloat()
+                setStroke(dp(2), accent)
+            }
+        }
+        if (doneAll) {
+            box.addView(label(tr("✅ Semua siap!", "✅ All set!", "✅ 全部完成！"), 22f, bold = true, color = accent))
+            box.addView(
+                label(
+                    tr(
+                        "JagaPMA sedang menjaga ${Prefs.callName(this)}. Link yang ditekan akan disemak dulu.",
+                        "JagaPMA is guarding ${Prefs.callName(this)}. Tapped links are checked first.",
+                        "JagaPMA 正在守护${Prefs.callName(this)}。点击的链接会先被检查。",
+                    ),
+                    16f
+                ).apply { setPadding(0, dp(6), 0, 0) }
+            )
+        } else {
+            val s = steps[next]
+            box.addView(
+                label(tr("Langkah ${next + 1} daripada ${steps.size}", "Step ${next + 1} of ${steps.size}", "第 ${next + 1} 步，共 ${steps.size} 步"), 14f, color = grey)
+            )
+            box.addView(label(s.title, 22f, bold = true, color = accent).apply { setPadding(0, dp(4), 0, 0) })
+            box.addView(label(s.why, 16f).apply { setPadding(0, dp(6), 0, dp(10)) })
+            box.addView(BotUi.bigButton(this, tr("Teruskan  ➜", "Continue  ➜", "继续  ➜"), accent) { s.action() })
+        }
+        return box
+    }
+
     private fun refreshStatus() {
         statusBox.removeAllViews()
-        if (!BuildConfig.PLAY) {
-            row(tr("Pop-up bot atas skrin", "Bot pop-up on screen", "屏幕上的机器人弹窗"), Settings.canDrawOverlays(this)) {
-                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
-            }
-        }
-        row(
-            tr("Pengawal link (jadikan browser utama)", "Link guard (set as default browser)", "链接守卫（设为默认浏览器）"),
-            isDefaultBrowser()
-        ) { requestBrowserRole() }
-        row(tr("Jangan dimatikan di latar belakang", "Keep running in the background", "保持在后台运行"), ignoringBattery()) {
-            // Versi Play tiada kebenaran REQUEST_IGNORE_BATTERY_OPTIMIZATIONS — buka senarai tetapan sahaja
-            try {
-                if (BuildConfig.PLAY) {
-                    toast(tr("Cari JagaPMA → pilih \"Tidak dioptimumkan\"", "Find JagaPMA → choose \"Not optimised\"", "找到 JagaPMA → 选择「不优化」"))
-                    startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-                } else {
-                    startActivity(
-                        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName"))
-                    )
-                }
-            } catch (_: Exception) {
-                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-            }
-        }
-        if (Build.VERSION.SDK_INT >= 33) {
-            val ok = checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-            row(tr("Notifikasi amaran", "Warning notifications", "警告通知"), ok) { requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1) }
-        }
+        val steps = steps()
+        statusBox.addView(guideCard(steps), LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = dp(12) })
+        for (s in steps) if (s.row.isNotEmpty()) row(s.row, s.done) { s.action() }
 
         // Pilihan — tanpa ni, bot masih semak setiap link yang ditekan (pengawal link).
         // Versi Play tiada Baca skrin langsung.
@@ -378,16 +474,7 @@ class MainActivity : Activity() {
     private fun ignoringBattery(): Boolean =
         getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName)
 
-    private fun isDefaultBrowser(): Boolean {
-        if (Build.VERSION.SDK_INT >= 29) {
-            return getSystemService(RoleManager::class.java).isRoleHeld(RoleManager.ROLE_BROWSER)
-        }
-        val r = packageManager.resolveActivity(
-            Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com")),
-            PackageManager.MATCH_DEFAULT_ONLY
-        )
-        return r?.activityInfo?.packageName == packageName
-    }
+    private fun isDefaultBrowser(): Boolean = Health.isDefaultBrowser(this)
 
     @Suppress("DEPRECATION")
     private fun requestBrowserRole() {

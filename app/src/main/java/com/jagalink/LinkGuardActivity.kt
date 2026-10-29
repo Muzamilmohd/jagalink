@@ -21,13 +21,17 @@ class LinkGuardActivity : Activity() {
             finish()
             return
         }
-        val v = LinkAnalyzer.analyzeUrl(uri.toString(), lang = Prefs.lang(this))
-        // Dah pasti bahaya, atau semakan Google dimatikan → terus guna keputusan dalam phone
-        if (v.level == Level.DANGER || !SafeBrowsing.enabled(this)) {
+        Blocklist.ensureLoaded(this)
+        val lang = Prefs.lang(this)
+        val v = LinkAnalyzer.analyzeUrl(uri.toString(), lang = lang)
+        // Link pendek (bit.ly…) — versi GitHub cari destinasi sebenar dulu
+        val expand = !BuildConfig.PLAY && v.level != Level.DANGER && LinkAnalyzer.isShortener(v.host)
+        // Dah pasti bahaya, atau tiada semakan internet → terus guna keputusan dalam phone
+        if (!expand && (v.level == Level.DANGER || !SafeBrowsing.enabled(this))) {
             decide(uri, v)
             return
         }
-        // Tanya Google Safe Browsing (hash sahaja). Tunjuk "sedang semak" kalau lambat.
+        // Semakan internet. Tunjuk "sedang semak" kalau lambat.
         val waiting = Runnable {
             setContentView(
                 BotUi.text(this, tr("🔍 Sedang semak link…", "🔍 Checking link…", "🔍 正在检查链接…"), 20f, Color.WHITE)
@@ -37,19 +41,35 @@ class LinkGuardActivity : Activity() {
         val main = Handler(mainLooper)
         main.postDelayed(waiting, 400)
         Thread {
-            val threat = SafeBrowsing.check(this, uri.toString())
+            var target: Uri = uri
+            var verdict = v
+            if (expand) {
+                ShortLinks.resolve(uri.toString(), LinkAnalyzer::isShortener)?.let { real ->
+                    target = Uri.parse(real)
+                    val v2 = LinkAnalyzer.analyzeUrl(real, lang = lang)
+                    val shown = tr(
+                        "Link pendek ni sebenarnya pergi ke: ${v2.host}",
+                        "This short link actually goes to: ${v2.host}",
+                        "这个短链接实际前往：${v2.host}",
+                    )
+                    verdict = Verdict(v2.url, v2.host, v2.score, listOf(shown) + v2.reasons, v2.adult)
+                }
+            }
+            val threat = if (verdict.level != Level.DANGER && SafeBrowsing.enabled(this)) {
+                SafeBrowsing.check(this, target.toString())
+            } else null
             runOnUiThread {
                 main.removeCallbacks(waiting)
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 if (threat == null) {
-                    decide(uri, v)
+                    decide(target, verdict)
                 } else {
                     val why = tr(
                         "Google Safe Browsing kenal pasti ni sebagai ${SafeBrowsing.describe(this, threat)}.",
                         "Google Safe Browsing flags this as ${SafeBrowsing.describe(this, threat)}.",
                         "Google 安全浏览将其识别为${SafeBrowsing.describe(this, threat)}。",
                     )
-                    decide(uri, Verdict(v.url, v.host, 100, listOf(why) + v.reasons))
+                    decide(target, Verdict(verdict.url, verdict.host, 100, listOf(why) + verdict.reasons))
                 }
             }
         }.start()

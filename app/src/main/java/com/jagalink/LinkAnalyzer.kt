@@ -40,6 +40,19 @@ data class Verdict(
  */
 object LinkAnalyzer {
 
+    /** Domain scam dari blocklist/domains.txt (dimuat oleh Blocklist). Subdomain ikut sekali. */
+    @Volatile var extraBlocked: Set<String> = emptySet()
+
+    fun isShortener(host: String): Boolean = host.lowercase(Locale.ROOT).removePrefix("www.") in SHORTENERS
+
+    /** Baca isi domains.txt — buang komen, ruang kosong, https:// dan laluan. */
+    fun parseBlocklist(text: String): Set<String> =
+        text.lineSequence()
+            .map { it.substringBefore('#').trim().lowercase(Locale.ROOT) }
+            .map { it.replace(Regex("^[a-z]+://"), "").substringBefore('/').trimEnd('.') }
+            .filter { it.contains('.') && Regex("^[a-z0-9.-]+$").matches(it) }
+            .toSet()
+
     /**
      * BANK   – bank, bank digital, e-wallet, pembayaran: ejaan hampir sama pun dikira BAHAYA.
      * OTHER  – kerajaan, kurier, kedai online, utiliti: ejaan hampir sama dikira MENCURIGAKAN.
@@ -256,6 +269,20 @@ object LinkAnalyzer {
                     )
                 ),
                 adult = true,
+            )
+        }
+
+        val blocked = extraBlocked
+        if (host.isNotEmpty() && blocked.any { host == it || host.endsWith(".$it") }) {
+            return Verdict(
+                url, host, 100,
+                listOf(
+                    lang.t(
+                        "Laman ni dalam senarai scam JagaPMA (dikemas kini harian).",
+                        "This site is on JagaPMA's scam list (updated daily).",
+                        "这个网站在 JagaPMA 的诈骗名单中（每日更新）。",
+                    )
+                ),
             )
         }
 

@@ -1,10 +1,12 @@
 package com.jagalink
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -28,6 +30,7 @@ object WarnCenter {
 
     fun check(ctx: Context, text: String, app: String?, source: Source) {
         if (text.isBlank()) return
+        Blocklist.ensureLoaded(ctx)
         val worst = LinkAnalyzer.analyzeMessage(text, Prefs.lang(ctx)).maxByOrNull { it.score } ?: return
         if (worst.level == Level.SAFE) return
 
@@ -198,6 +201,25 @@ object BotUi {
             }, spaced(ctx, 10))
         }
 
+        // Dah terkena? Terus ke talian bantuan rasmi
+        card.addView(text(ctx, ctx.tr("Dah terkena scam?", "Already scammed?", "已经被骗了？"), 14f, Color.GRAY), spaced(ctx, 14))
+        val help = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
+        help.addView(text(ctx, ctx.tr("📞 NSRC 997", "📞 NSRC 997", "📞 NSRC 997"), 15f, Color.rgb(211, 47, 47), bold = true).apply {
+            setPadding(ctx.dp(6), ctx.dp(8), ctx.dp(6), ctx.dp(8))
+            setOnClickListener {
+                openExternal(ctx, Intent(Intent.ACTION_DIAL, Uri.parse("tel:997")))
+                onDismiss()
+            }
+        }, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        help.addView(text(ctx, ctx.tr("🔎 Semak Mule", "🔎 Semak Mule", "🔎 Semak Mule"), 15f, Color.rgb(25, 118, 210), bold = true).apply {
+            setPadding(ctx.dp(6), ctx.dp(8), ctx.dp(6), ctx.dp(8))
+            setOnClickListener {
+                openExternal(ctx, Intent(Intent.ACTION_VIEW, Uri.parse("https://semakmule.rmp.gov.my/")))
+                onDismiss()
+            }
+        }, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        card.addView(help, spaced(ctx, 2))
+
         if (onSetup != null) {
             val setupLabel = ctx.tr(
                 "⚙️ Isi nama & nombor anak untuk WhatsApp kedua",
@@ -230,6 +252,13 @@ object BotUi {
             }, spaced(ctx, 12))
         }
         return root
+    }
+
+    private fun openExternal(ctx: Context, intent: Intent) {
+        try {
+            ctx.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (_: Exception) {
+        }
     }
 
     private fun spaced(ctx: Context, topDp: Int) =

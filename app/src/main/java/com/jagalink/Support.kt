@@ -38,6 +38,16 @@ object Prefs {
     fun voice(c: Context): Boolean = sp(c).getBoolean("voice", true)
     fun isSetUp(c: Context): Boolean = sp(c).contains("name")
 
+    fun lastBlocklistFetch(c: Context): Long = sp(c).getLong("last_blocklist_fetch", 0)
+    fun setLastBlocklistFetch(c: Context, t: Long) {
+        sp(c).edit().putLong("last_blocklist_fetch", t).apply()
+    }
+
+    fun guardWasOn(c: Context): Boolean = sp(c).getBoolean("guard_was_on", false)
+    fun setGuardWasOn(c: Context) {
+        if (!guardWasOn(c)) sp(c).edit().putBoolean("guard_was_on", true).apply()
+    }
+
     fun safeBrowsing(c: Context): Boolean = sp(c).getBoolean("safe_browsing", true)
     fun setSafeBrowsing(c: Context, on: Boolean) {
         sp(c).edit().putBoolean("safe_browsing", on).apply()

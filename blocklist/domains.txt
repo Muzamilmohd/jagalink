@@ -1,0 +1,9 @@
+# Senarai domain scam JagaPMA — satu domain setiap baris. Subdomain ikut sekali.
+# Versi GitHub muat turun fail ni sekali sehari; versi Play dapat salinan setiap kali release.
+# Baris bermula dengan # diabaikan. Tulis domain sahaja (tanpa https:// dan tanpa laluan).
+#
+# Sumber yang disyorkan: Senarai Amaran Pengguna Kewangan BNM, laporan NSRC 997, laporan pengguna.
+# Hanya tambah domain yang PASTI scam.
+
+# Domain ujian (.example memang dikhaskan dan tak wujud) — untuk uji ciri ni:
+jagapma-ujian-scam.example

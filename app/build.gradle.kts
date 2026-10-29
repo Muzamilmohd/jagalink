@@ -33,6 +33,9 @@ android {
         buildConfig = true
     }
 
+    // Senarai domain scam (blocklist/domains.txt) dibungkus dalam APK — versi Play tiada internet
+    sourceSets["main"].assets.srcDir(rootProject.file("blocklist"))
+
     // github = APK di GitHub Releases (kemas kini sendiri + Baca skrin).
     // play   = Google Play: tiada kemas kini sendiri, tiada internet, tiada Baca skrin
     //          (kebenaran tu tak dibenarkan / perlu deklarasi khas di Play).

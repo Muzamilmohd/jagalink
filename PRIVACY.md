@@ -25,6 +25,8 @@ Bila anda tekan **"Hantar link ke anak"**, app membuka WhatsApp (atau SMS) denga
 - **Versi Google Play:** tiada kebenaran internet langsung.
 - **Versi GitHub:** hanya menyemak versi baru dan memuat turun fail kemas kini dari GitHub (`api.github.com`, `github.com`). Tiada data peribadi dihantar.
 - **Versi GitHub — Google Safe Browsing (boleh dimatikan dalam Tetapan):** bila anda tekan link, app menghantar **4 bait pertama cap jari SHA-256 (hash)** link tersebut ke Google (`safebrowsing.googleapis.com`) untuk semak virus dan penipuan. Link penuh **tidak** dihantar dan Google tidak boleh tahu link sebenar daripada cap jari ini. Padanan dibuat dalam telefon. Tertakluk kepada [Polisi Privasi Google](https://policies.google.com/privacy).
+- **Versi GitHub — senarai scam:** sekali sehari app memuat turun senarai domain scam awam (`blocklist/domains.txt`) dari GitHub. Tiada data dihantar.
+- **Versi GitHub — link pendek (bit.ly, tinyurl…):** bila link pendek ditekan, app bertanya kepada servis link pendek tersebut ke mana link itu pergi (sama seperti membuka link). Laman destinasi tidak dihubungi.
 
 ## Pihak ketiga
 Tiada iklan, tiada analitik, tiada SDK pihak ketiga.
@@ -62,6 +64,8 @@ When you tap **"Send link to my child"**, the app opens WhatsApp (or SMS) with a
 - **Google Play version:** no internet permission at all.
 - **GitHub version:** only checks for new versions and downloads update files from GitHub (`api.github.com`, `github.com`). No personal data is sent.
 - **GitHub version — Google Safe Browsing (can be turned off in Settings):** when you tap a link, the app sends **the first 4 bytes of the link's SHA-256 fingerprint (hash)** to Google (`safebrowsing.googleapis.com`) to check for malware and scams. The full link is **never** sent, and Google cannot work out the real link from this fingerprint. Matching happens on the phone. Subject to [Google's Privacy Policy](https://policies.google.com/privacy).
+- **GitHub version — scam list:** once a day the app downloads the public scam domain list (`blocklist/domains.txt`) from GitHub. No data is sent.
+- **GitHub version — short links (bit.ly, tinyurl…):** when a short link is tapped, the app asks that short-link service where it leads (just like opening it). The destination site is not contacted.
 
 ### Third parties
 No ads, no analytics, no third-party SDKs.

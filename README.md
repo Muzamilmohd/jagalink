@@ -15,6 +15,10 @@ Bot kecil yang keluar atas skrin bila ada link mencurigakan dalam WhatsApp, Tele
 - **Link nombor IP**, simbol `@` tersorok, tiada https, alamat berselirat
 - **Ayat scam** dalam mesej/emel (menang hadiah, akaun disekat, sahkan segera, bungkusan tertahan, OTP…) — BM, English & 中文
 - **Laman lucah** — disekat terus, tiada pilihan "buka juga"
+- **Laman scam di platform percuma** — Google Sites, Google Forms, Blogspot, Linktree dll yang guna nama bank. Borang online sentiasa diberi amaran "jangan isi OTP / kata laluan".
+- **Senarai scam harian** — domain scam baru (`blocklist/domains.txt`) sampai ke semua phone dalam 24 jam tanpa update app.
+- **Link pendek dibuka dulu** *(versi GitHub)* — bit.ly, tinyurl dll disemak destinasi sebenarnya.
+- **Amaran bila perlindungan terputus**, panduan setup langkah demi langkah, dan butang **NSRC 997 / Semak Mule** pada kad amaran.
 
 Semua semakan dibuat **dalam telefon**. Tiada mesej atau link dihantar ke mana-mana. Internet hanya digunakan untuk semak versi baru di GitHub dan *(versi GitHub, boleh dimatikan)* semak link yang ditekan dengan **Google Safe Browsing** — hanya cap jari ringkas (hash) dihantar, bukan link penuh.
 

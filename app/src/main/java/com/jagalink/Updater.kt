@@ -175,7 +175,8 @@ object Updater {
         // Semakan update tak boleh sekali-kali buat app crash — perlindungan scam lebih penting.
         try {
             val js = ctx.getSystemService(JobScheduler::class.java)
-            if (!enabled || !Prefs.autoUpdate(ctx)) {
+            // Job harian juga muat turun senarai scam — jadi kekal berjalan walaupun semak-update dimatikan
+            if (!enabled) {
                 js.cancel(JOB_ID)
                 return
             }
@@ -220,13 +221,21 @@ object Updater {
     }
 }
 
-/** Semakan latar sekali sehari — keluarkan notifikasi kalau ada versi baru. */
+/** Sekali sehari: muat turun senarai scam terbaru, dan (kalau dibenarkan) semak versi baru app. */
 class UpdateJob : JobService() {
     override fun onStartJob(params: JobParameters): Boolean {
-        Updater.check { rel, _ ->
-            if (rel != null) Updater.notifyNew(this, rel)
-            jobFinished(params, false)
-        }
+        val app = applicationContext
+        Thread {
+            Blocklist.refresh(app)
+            if (!Prefs.autoUpdate(app)) {
+                jobFinished(params, false)
+                return@Thread
+            }
+            Updater.check { rel, _ ->
+                if (rel != null) Updater.notifyNew(this, rel)
+                jobFinished(params, false)
+            }
+        }.start()
         return true
     }
 
