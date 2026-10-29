@@ -21,6 +21,9 @@ templates next to Chinese text use `${name}`, not `$name` (Han characters count 
   SOCIAL exact only; near match = 1 edit, or 2 substitutions with same first letter; `EXACT_ONLY` for keywords
   close to common words. Only add official domains verified to exist (HTTPS/DNS) — an unregistered whitelisted
   domain could be bought by a scammer. Look-alike suite: 71 cases (scratch test, re-create when changing rules).
+  Free hosting / forms (`hostedPlatform`: Google Sites/Forms, Blogspot, Linktree, Wix, Firebase, GitHub Pages…) are
+  NOT short-circuited by `TRUSTED`: the creator-chosen path is scanned with `brandInText` (bank name → DANGER),
+  forms always WARN ("don't enter OTP/password"). Hosting suite: 21 cases.
   Adult sites (`ADULT_SITES`, `ADULT_WORDS`, `ADULT_TOKENS`, `ADULT_TLDS`) score 100 with
   `Verdict.adult = true` — hard-blocked: the bot card hides the "Buka juga" option.
 - `Watchers.kt` – `ScreenWatcher` (AccessibilityService, scans screen text + clicked views, throttled 1.5 s). Optional in setup

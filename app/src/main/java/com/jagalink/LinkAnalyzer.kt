@@ -268,7 +268,39 @@ object LinkAnalyzer {
             )
         }
 
-        if (isTrusted(host)) return Verdict(url, host, score.coerceAtMost(100), reasons)
+        // Laman di platform percuma: domain mungkin "dipercayai", tapi kandungannya dibuat sesiapa.
+        val path = url.replace(Regex("(?i)^[a-z][a-z0-9+.-]*://"), "").substringAfter('/', "").substringBefore('#')
+        val hosted = hostedPlatform(host, path.lowercase(Locale.ROOT))
+        if (hosted != null) {
+            val (platform, isForm) = hosted
+            val inPath = brandInText(path)
+            if (inPath != null) {
+                val brand = inPath.brand.display
+                add(
+                    when (inPath.brand.kind) { Kind.BANK -> 70; Kind.OTHER -> 50; Kind.SOCIAL -> 30 },
+                    "Laman percuma ($platform) guna nama \"$brand\" — $brand sebenar takkan guna laman macam ni.",
+                    "A free $platform page using the name \"$brand\" — the real $brand never uses pages like this.",
+                    "免费的 $platform 页面使用「$brand」的名字——真正的 $brand 不会使用这种页面。",
+                )
+            }
+            if (isForm) {
+                add(
+                    35,
+                    "Ini borang online ($platform). Jangan sekali-kali isi kata laluan, OTP/TAC, nombor kad atau IC.",
+                    "This is an online form ($platform). Never enter passwords, OTP/TAC codes, card or IC numbers.",
+                    "这是在线表格（$platform）。千万不要填写密码、OTP/TAC 验证码、银行卡或身份证号码。",
+                )
+            } else if (inPath == null) {
+                add(
+                    10,
+                    "Laman ni dibuat di platform percuma ($platform) — sesiapa pun boleh buat laman macam ni.",
+                    "This page is on a free platform ($platform) — anyone can make a page like this.",
+                    "这个页面在免费平台（$platform）上——任何人都能做这样的页面。",
+                )
+            }
+        } else if (isTrusted(host)) {
+            return Verdict(url, host, score.coerceAtMost(100), reasons)
+        }
 
         if (host.any { it.code > 127 }) {
             add(
@@ -414,6 +446,28 @@ object LinkAnalyzer {
             }
             .joinToString("")
 
+    // Platform laman / borang percuma — sesiapa boleh buat laman di sini, walaupun domainnya "dipercayai"
+    // (cth sites.google.com). Nama laman / laluan dipilih sendiri oleh pembuat, jadi mesti disemak.
+    private val SUBDOMAIN_HOSTS = mapOf(
+        "blogspot.com" to "Blogspot", "wixsite.com" to "Wix", "weebly.com" to "Weebly", "wordpress.com" to "WordPress",
+        "github.io" to "GitHub Pages", "netlify.app" to "Netlify", "vercel.app" to "Vercel", "web.app" to "Firebase",
+        "firebaseapp.com" to "Firebase", "pages.dev" to "Cloudflare Pages", "glitch.me" to "Glitch",
+        "notion.site" to "Notion", "carrd.co" to "Carrd", "godaddysites.com" to "GoDaddy", "square.site" to "Square",
+        "canva.site" to "Canva", "webflow.io" to "Webflow", "framer.website" to "Framer",
+    )
+
+    /** (nama platform, borang?) kalau link ni laman di platform percuma; null kalau bukan. */
+    private fun hostedPlatform(host: String, path: String): Pair<String, Boolean>? = when {
+        host == "sites.google.com" -> "Google Sites" to false
+        host == "docs.google.com" && path.startsWith("forms") -> "Google Forms" to true
+        host == "forms.gle" -> "Google Forms" to true
+        host == "forms.office.com" || host == "forms.microsoft.com" -> "Microsoft Forms" to true
+        host == "jotform.com" || host.endsWith(".jotform.com") -> "Jotform" to true
+        host.endsWith(".typeform.com") -> "Typeform" to true
+        host == "linktr.ee" -> "Linktree" to false
+        else -> SUBDOMAIN_HOSTS.entries.firstOrNull { host.endsWith(".${it.key}") }?.let { it.value to false }
+    }
+
     private val PUBLIC_SUFFIXES = setOf(
         "com.my", "net.my", "org.my", "gov.my", "edu.my", "mil.my", "name.my", "biz.my",
         "co.uk", "com.sg", "com.au", "co.id", "com.ph", "co.th", "com.cn", "com.hk", "co.in",
@@ -434,9 +488,25 @@ object LinkAnalyzer {
         val core = labels.dropLast(suffixLen).ifEmpty { labels }
         val tokens = core.flatMap { it.split('-') }.filter { it.isNotEmpty() }.map { normalize(it) }
         val compact = normalize(core.joinToString("").replace("-", ""))
+        return matchBrands(tokens, compact) { b -> b.officials.any { host == it || host.endsWith(".$it") } }
+    }
+
+    /**
+     * Cari nama jenama dalam teks bebas — bahagian link yang pengguna laman boleh pilih sendiri
+     * (cth "/view/maybank2u-login" di Google Sites). Token panjang (ID rawak borang) diabaikan.
+     */
+    private fun brandInText(text: String): Impersonation? {
+        val tokens = text.lowercase(Locale.ROOT).split(Regex("[^a-z0-9]+"))
+            .filter { it.isNotEmpty() && it.length < 20 }
+            .map { normalize(it) }
+        if (tokens.isEmpty()) return null
+        return matchBrands(tokens, tokens.joinToString("")) { false }
+    }
+
+    private fun matchBrands(tokens: List<String>, compact: String, skip: (Brand) -> Boolean): Impersonation? {
         var fuzzy: Impersonation? = null
         for (b in BRANDS) {
-            if (b.officials.any { host == it || host.endsWith(".$it") }) continue
+            if (skip(b)) continue
             for (raw in b.keywords) {
                 val k = normalize(raw)
                 val exact = when {
