@@ -40,45 +40,86 @@ data class Verdict(
  */
 object LinkAnalyzer {
 
-    private data class Brand(val token: String, val display: String, val officials: List<String>)
+    /**
+     * BANK   – bank, bank digital, e-wallet, pembayaran: ejaan hampir sama pun dikira BAHAYA.
+     * OTHER  – kerajaan, kurier, kedai online, utiliti: ejaan hampir sama dikira MENCURIGAKAN.
+     * SOCIAL – app sosial: hanya nama tepat (elak salah tangkap perkataan biasa, cth "telegraph").
+     */
+    private enum class Kind { BANK, OTHER, SOCIAL }
 
-    // Jenama yang selalu ditiru scammer di Malaysia + laman rasmi mereka.
+    /** [keywords] = nama jenama + nama domain rasmi (cth "maybank2u") — semua dibanding dengan alamat link. */
+    private data class Brand(val display: String, val keywords: List<String>, val officials: List<String>, val kind: Kind)
+
+    // Laman rasmi DISAHKAN wujud (HTTPS / DNS, Okt 2026). Jangan tambah domain yang belum disahkan:
+    // kalau domain tu belum didaftar, scammer boleh daftar dan app akan anggap ia selamat.
     private val BRANDS = listOf(
-        Brand("maybank", "Maybank", listOf("maybank2u.com.my", "maybank.com", "maybank.com.my")),
-        Brand("cimb", "CIMB", listOf("cimbclicks.com.my", "cimb.com.my", "cimb.com")),
-        Brand("publicbank", "Public Bank", listOf("pbebank.com", "publicbank.com.my")),
-        Brand("pbebank", "Public Bank", listOf("pbebank.com")),
-        Brand("rhb", "RHB", listOf("rhbgroup.com", "rhbnow.com.my")),
-        Brand("bankislam", "Bank Islam", listOf("bankislam.com")),
-        Brand("bsn", "BSN", listOf("bsn.com.my")),
-        Brand("ambank", "AmBank", listOf("ambank.com.my", "ambankgroup.com")),
-        Brand("hongleong", "Hong Leong Bank", listOf("hlb.com.my", "hongleong.com.my")),
-        Brand("bankrakyat", "Bank Rakyat", listOf("bankrakyat.com.my")),
-        Brand("touchngo", "Touch 'n Go", listOf("touchngo.com.my", "tngdigital.com.my")),
-        Brand("tng", "Touch 'n Go", listOf("touchngo.com.my", "tngdigital.com.my")),
-        Brand("poslaju", "Pos Laju", listOf("pos.com.my")),
-        Brand("posmalaysia", "Pos Malaysia", listOf("pos.com.my")),
-        Brand("lhdn", "LHDN", listOf("hasil.gov.my")),
-        Brand("kwsp", "KWSP", listOf("kwsp.gov.my")),
-        Brand("epf", "KWSP", listOf("kwsp.gov.my")),
-        Brand("jpj", "JPJ", listOf("jpj.gov.my")),
-        Brand("pdrm", "PDRM", listOf("rmp.gov.my")),
-        Brand("perkeso", "PERKESO", listOf("perkeso.gov.my")),
-        Brand("shopee", "Shopee", listOf("shopee.com.my", "shopee.com", "shope.ee")),
-        Brand("lazada", "Lazada", listOf("lazada.com.my", "lazada.com")),
-        Brand("tnb", "TNB", listOf("tnb.com.my", "mytnb.com.my")),
-        Brand("myeg", "MyEG", listOf("myeg.com.my")),
-        Brand("unifi", "Unifi", listOf("unifi.com.my", "tm.com.my")),
-        Brand("jnt", "J&T", listOf("jtexpress.my")),
-        Brand("ninjavan", "Ninja Van", listOf("ninjavan.co")),
-        Brand("dhl", "DHL", listOf("dhl.com", "dhl.com.my")),
-        Brand("whatsapp", "WhatsApp", listOf("whatsapp.com", "whatsapp.net", "wa.me")),
-        Brand("facebook", "Facebook", listOf("facebook.com", "fb.com", "fb.watch")),
-        Brand("instagram", "Instagram", listOf("instagram.com")),
-        Brand("google", "Google", listOf("google.com", "google.com.my", "goo.gl")),
-        Brand("youtube", "YouTube", listOf("youtube.com", "youtu.be")),
-        Brand("netflix", "Netflix", listOf("netflix.com")),
-        Brand("telegram", "Telegram", listOf("telegram.org", "t.me")),
+        // ---- Bank
+        Brand("Maybank", listOf("maybank", "maybank2u", "maybank2e"),
+            listOf("maybank2u.com.my", "maybank.com", "maybank.com.my", "maybank2e.net", "maybank2e.com",
+                "maybank.com.sg", "maybank2u.com.sg", "maybank.co.id"), Kind.BANK),
+        Brand("CIMB", listOf("cimb", "cimbclicks", "cimbbank"),
+            listOf("cimbclicks.com.my", "cimb.com.my", "cimb.com", "cimbislamic.com",
+                "cimb.com.sg", "cimbthai.com", "cimbniaga.co.id"), Kind.BANK),
+        Brand("Public Bank", listOf("publicbank", "pbebank", "publicislamic"),
+            listOf("pbebank.com", "publicbank.com.my", "publicislamicbank.com.my"), Kind.BANK),
+        Brand("RHB", listOf("rhb", "rhbbank", "rhbnow", "rhbgroup"), listOf("rhbgroup.com", "rhb.com.my", "rhbgroup.com.sg"), Kind.BANK),
+        Brand("Hong Leong Bank", listOf("hongleong", "hlbank", "hlbconnect", "hongleongconnect"),
+            listOf("hlb.com.my", "hongleongconnect.my"), Kind.BANK),
+        Brand("AmBank", listOf("ambank"), listOf("ambank.com.my", "ambankgroup.com", "amonline.com.my"), Kind.BANK),
+        Brand("Bank Islam", listOf("bankislam"), listOf("bankislam.com"), Kind.BANK),
+        Brand("Bank Rakyat", listOf("bankrakyat", "irakyat"), listOf("bankrakyat.com.my", "irakyat.com.my"), Kind.BANK),
+        Brand("BSN", listOf("bsn", "mybsn"), listOf("bsn.com.my", "mybsn.com.my"), Kind.BANK),
+        Brand("Affin Bank", listOf("affinbank", "affinalways"), listOf("affinalways.com"), Kind.BANK),
+        Brand("Alliance Bank", listOf("alliancebank", "allianceonline"),
+            listOf("alliancebank.com.my", "allianceonline.com.my"), Kind.BANK),
+        Brand("Bank Muamalat", listOf("muamalat"), listOf("muamalat.com.my"), Kind.BANK),
+        Brand("Agrobank", listOf("agrobank"), listOf("agrobank.com.my"), Kind.BANK),
+        Brand("MBSB Bank", listOf("mbsb", "mbsbbank"), listOf("mbsb.com", "mbsb.com.my", "mbsbbank.com"), Kind.BANK),
+        Brand("OCBC", listOf("ocbc"), listOf("ocbc.com.my", "ocbc.com", "ocbc.com.sg"), Kind.BANK),
+        Brand("UOB", listOf("uob", "uobbank"), listOf("uob.com.my", "uob.com.sg"), Kind.BANK),
+        Brand("HSBC", listOf("hsbc", "hsbcamanah"), listOf("hsbc.com.my", "hsbcamanah.com.my", "hsbc.com", "hsbcnet.com"), Kind.BANK),
+        Brand("Standard Chartered", listOf("standardchartered"), listOf("sc.com"), Kind.BANK),
+        Brand("Citibank", listOf("citibank"), listOf("citibank.com.my"), Kind.BANK),
+        Brand("Al Rajhi Bank", listOf("alrajhi"), listOf("alrajhibank.com.my"), Kind.BANK),
+        Brand("Kuwait Finance House", listOf("kfh"), listOf("kfh.com.my"), Kind.BANK),
+        // ---- Bank digital
+        Brand("GXBank", listOf("gxbank"), listOf("gxbank.my"), Kind.BANK),
+        Brand("Boost", listOf("boostbank", "myboost"), listOf("boostbank.my", "myboost.com.my", "myboost.co"), Kind.BANK),
+        Brand("AEON Bank", listOf("aeonbank"), listOf("aeonbank.com.my"), Kind.BANK),
+        Brand("KAF Digital Bank", listOf("kafdigital", "kafbank"), listOf("kaf.com.my"), Kind.BANK),
+        Brand("Ryt Bank", listOf("rytbank"), listOf("rytbank.my"), Kind.BANK),
+        // ---- E-wallet & pembayaran
+        Brand("Touch 'n Go", listOf("touchngo", "tngdigital", "tng", "tngo"),
+            listOf("touchngo.com.my", "tngdigital.com.my"), Kind.BANK),
+        Brand("BigPay", listOf("bigpay"), listOf("bigpayme.com"), Kind.BANK),
+        Brand("ShopeePay", listOf("shopeepay"), listOf("shopeepay.com.my"), Kind.BANK),
+        Brand("DuitNow / FPX", listOf("duitnow", "paynet", "mepsfpx"),
+            listOf("paynet.my", "duitnow.my", "mepsfpx.com.my"), Kind.BANK),
+        // ---- Kerajaan (semua *.gov.my memang dipercayai)
+        Brand("LHDN", listOf("lhdn", "myhasil"), listOf("hasil.gov.my"), Kind.OTHER),
+        Brand("KWSP", listOf("kwsp", "epf", "ikwsp"), listOf("kwsp.gov.my"), Kind.OTHER),
+        Brand("JPJ", listOf("jpj", "myjpj"), listOf("jpj.gov.my"), Kind.OTHER),
+        Brand("PDRM", listOf("pdrm"), listOf("rmp.gov.my"), Kind.OTHER),
+        Brand("PERKESO", listOf("perkeso"), listOf("perkeso.gov.my"), Kind.OTHER),
+        Brand("MyEG", listOf("myeg"), listOf("myeg.com.my"), Kind.OTHER),
+        // ---- Kurier, kedai online, utiliti
+        Brand("Pos Malaysia", listOf("poslaju", "posmalaysia"), listOf("pos.com.my"), Kind.OTHER),
+        Brand("J&T", listOf("jnt", "jtexpress"), listOf("jtexpress.my"), Kind.OTHER),
+        Brand("Ninja Van", listOf("ninjavan"), listOf("ninjavan.co"), Kind.OTHER),
+        Brand("DHL", listOf("dhl"), listOf("dhl.com", "dhl.com.my"), Kind.OTHER),
+        Brand("Shopee", listOf("shopee"), listOf("shopee.com.my", "shopee.com", "shope.ee"), Kind.OTHER),
+        Brand("Lazada", listOf("lazada"), listOf("lazada.com.my", "lazada.com"), Kind.OTHER),
+        Brand("TNB", listOf("tnb", "mytnb"), listOf("tnb.com.my", "mytnb.com.my"), Kind.OTHER),
+        Brand("Unifi", listOf("unifi"), listOf("unifi.com.my", "tm.com.my"), Kind.SOCIAL),
+        Brand("Setel", listOf("setel"), listOf("setel.com"), Kind.SOCIAL),
+        // ---- Sosial & teknologi — nama tepat sahaja
+        Brand("WhatsApp", listOf("whatsapp"), listOf("whatsapp.com", "whatsapp.net", "wa.me"), Kind.SOCIAL),
+        Brand("Facebook", listOf("facebook"), listOf("facebook.com", "fb.com", "fb.watch"), Kind.SOCIAL),
+        Brand("Instagram", listOf("instagram"), listOf("instagram.com"), Kind.SOCIAL),
+        Brand("Google", listOf("google"), listOf("google.com", "google.com.my", "goo.gl"), Kind.SOCIAL),
+        Brand("YouTube", listOf("youtube"), listOf("youtube.com", "youtu.be"), Kind.SOCIAL),
+        Brand("Netflix", listOf("netflix"), listOf("netflix.com"), Kind.SOCIAL),
+        Brand("Telegram", listOf("telegram"), listOf("telegram.org", "t.me"), Kind.SOCIAL),
     )
 
     // Laman yang dikira selamat (kecuali kalau link terus ke fail APK).
@@ -270,13 +311,24 @@ object LinkAnalyzer {
                 "这是缩短的链接——看不到它真正会去哪里。",
             )
         }
-        impersonatedBrand(host)?.let { brand ->
-            add(
-                65,
-                "Guna nama \"$brand\" tapi BUKAN laman rasmi $brand.",
-                "Uses the name \"$brand\" but is NOT the official $brand site.",
-                "使用「$brand」的名字，但不是 $brand 的官方网站。",
-            )
+        impersonatedBrand(host)?.let { hit ->
+            val brand = hit.brand.display
+            if (hit.exact) {
+                add(
+                    65,
+                    "Guna nama \"$brand\" tapi BUKAN laman rasmi $brand.",
+                    "Uses the name \"$brand\" but is NOT the official $brand site.",
+                    "使用「$brand」的名字，但不是 $brand 的官方网站。",
+                )
+            } else {
+                // Ejaan tipu: bank/e-wallet terus BAHAYA; yang lain MENCURIGAKAN (elak salah tangkap perkataan biasa)
+                add(
+                    if (hit.brand.kind == Kind.BANK) 60 else 40,
+                    "Alamat ni hampir sama dengan \"$brand\" (ejaan tipu) — BUKAN laman rasmi $brand.",
+                    "This address looks almost like \"$brand\" (trick spelling) — it is NOT the official $brand site.",
+                    "这个地址和「$brand」几乎一样（假拼写）——不是 $brand 的官方网站。",
+                )
+            }
         }
         val tld = host.substringAfterLast('.', "")
         if (tld in SUSPICIOUS_TLDS) {
@@ -362,20 +414,60 @@ object LinkAnalyzer {
             }
             .joinToString("")
 
-    private fun impersonatedBrand(host: String): String? {
-        val tokens = host.split('.', '-').filter { it.isNotEmpty() }.map { normalize(it) }
-        val compact = normalize(host.replace(".", "").replace("-", ""))
+    private val PUBLIC_SUFFIXES = setOf(
+        "com.my", "net.my", "org.my", "gov.my", "edu.my", "mil.my", "name.my", "biz.my",
+        "co.uk", "com.sg", "com.au", "co.id", "com.ph", "co.th", "com.cn", "com.hk", "co.in",
+    )
+
+    // Kata kunci yang dekat dengan perkataan biasa (rakyat, payment, online…) — nama tepat sahaja, tanpa ejaan hampir.
+    private val EXACT_ONLY = setOf("irakyat", "paynet", "myhasil", "ikwsp", "myjpj", "mytnb", "bigpay")
+
+    private class Impersonation(val brand: Brand, val exact: Boolean)
+
+    /**
+     * Cari jenama yang ditiru. Nama tepat dalam alamat (cth "maybank-secure.xyz") = exact.
+     * Ejaan hampir sama (cth "meybank2u", "meybenk2u", "cimbclick") = bukan exact.
+     */
+    private fun impersonatedBrand(host: String): Impersonation? {
+        val labels = host.split('.').filter { it.isNotEmpty() }
+        val suffixLen = if (labels.size >= 3 && labels.takeLast(2).joinToString(".") in PUBLIC_SUFFIXES) 2 else 1
+        val core = labels.dropLast(suffixLen).ifEmpty { labels }
+        val tokens = core.flatMap { it.split('-') }.filter { it.isNotEmpty() }.map { normalize(it) }
+        val compact = normalize(core.joinToString("").replace("-", ""))
+        var fuzzy: Impersonation? = null
         for (b in BRANDS) {
             if (b.officials.any { host == it || host.endsWith(".$it") }) continue
-            val hit = if (b.token.length <= 3) {
-                tokens.any { it == b.token }
-            } else {
-                compact.contains(b.token) ||
-                    tokens.any { it.length >= 5 && kotlin.math.abs(it.length - b.token.length) <= 1 && levenshtein(it, b.token) == 1 }
+            for (raw in b.keywords) {
+                val k = normalize(raw)
+                val exact = when {
+                    k.length <= 3 -> tokens.any { it == k }
+                    else -> compact.contains(k)
+                }
+                if (exact) return Impersonation(b, exact = true)
+                if (fuzzy == null && b.kind != Kind.SOCIAL && k.length >= 5 && raw !in EXACT_ONLY) {
+                    val maxDist = if (k.length >= 8) 2 else 1
+                    if (nearMatch(compact, k, maxDist)) fuzzy = Impersonation(b, exact = false)
+                }
             }
-            if (hit) return b.display
         }
-        return null
+        return fuzzy
+    }
+
+    /**
+     * Ada bahagian [s] (panjang k±1) yang berbeza ≤ [maxDist] huruf daripada [k]?
+     * Beza 2 huruf hanya dikira untuk huruf ditukar (panjang sama) dan huruf pertama sama — ejaan tipu
+     * biasanya begitu (cth "meybenk2u") — elak salah tangkap seperti "rakyatdigital" ≈ "kafdigital".
+     */
+    private fun nearMatch(s: String, k: String, maxDist: Int): Boolean {
+        for (len in (k.length - 1)..(k.length + 1)) {
+            if (len <= 0 || len > s.length) continue
+            for (i in 0..(s.length - len)) {
+                val w = s.substring(i, i + len)
+                val d = levenshtein(w, k)
+                if (d <= 1 || (d <= maxDist && len == k.length && w[0] == k[0])) return true
+            }
+        }
+        return false
     }
 
     private fun levenshtein(a: String, b: String): Int {
