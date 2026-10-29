@@ -53,7 +53,7 @@ Bila Mak tekan link dalam WhatsApp, Telegram, SMS, Facebook atau emel, JagaPMA s
 3. Isi nama panggilan dan nombor telefon anak
 4. Siap! Link selamat tetap dibuka dalam Chrome seperti biasa
 
-Ingat: JagaPMA membantu, tetapi tiada pengesan yang 100% sempurna. Jangan sesekali berikan OTP/TAC kepada sesiapa. Jika terkena scam, hubungi NSRC 997 segera.
+⚠️ PENAFIAN: JagaPMA ialah alat bantuan untuk mencegah penipuan, bukan jaminan. Ia tidak dapat mengesan semua scam. JagaPMA dan pembangunnya tidak bertanggungjawab atas sebarang kerugian atau penipuan. JagaPMA tidak berkaitan dengan mana-mana bank atau agensi kerajaan. Jangan sesekali berikan OTP/TAC kepada sesiapa. Jika terkena scam, hubungi NSRC 997 segera.
 ```
 
 ### 🇬🇧 English (en-US) — add as translation
@@ -94,7 +94,7 @@ When your parent taps a link in WhatsApp, Telegram, SMS, Facebook or email, Jaga
 3. Enter what to call your parent and your phone number
 4. Done! Safe links still open in Chrome as usual
 
-Note: JagaPMA helps, but no detector is perfect. Never share OTP/TAC codes with anyone. If scammed in Malaysia, call NSRC 997 immediately.
+⚠️ DISCLAIMER: JagaPMA is a helper tool to prevent scams, not a guarantee. It cannot detect every scam. JagaPMA and its developer are not responsible for any loss or fraud. JagaPMA is not affiliated with any bank or government agency. Never share OTP/TAC codes with anyone. If scammed in Malaysia, call NSRC 997 immediately.
 ```
 
 ## 3. Grafik (Store listing → Graphics)

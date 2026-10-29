@@ -34,6 +34,9 @@ Tiada iklan, tiada analitik, tiada SDK pihak ketiga.
 ## Kanak-kanak
 App ini tidak ditujukan kepada kanak-kanak dan tidak mengumpul data daripada sesiapa.
 
+## Penafian
+JagaPMA ialah alat bantuan pencegahan, bukan jaminan, dan disediakan "seadanya" tanpa waranti. JagaPMA dan pembangunnya tidak bertanggungjawab atas sebarang kerugian atau penipuan yang berlaku semasa atau selepas menggunakan app ini. JagaPMA tidak berkaitan dengan mana-mana bank, agensi kerajaan atau syarikat yang disebut dalam app.
+
 ## Hubungi
 Muzamil Mohd — buka isu di https://github.com/Muzamilmohd/jagalink/issues
 
@@ -72,6 +75,9 @@ No ads, no analytics, no third-party SDKs.
 
 ### Children
 This app is not directed at children and does not collect data from anyone.
+
+### Disclaimer
+JagaPMA is a prevention helper, not a guarantee, and is provided "as is" without warranty. JagaPMA and its developer are not responsible for any loss or fraud that happens while or after using this app. JagaPMA is not affiliated with any bank, government agency or company mentioned in the app.
 
 ### Contact
 Muzamil Mohd — open an issue at https://github.com/Muzamilmohd/jagalink/issues

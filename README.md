@@ -109,6 +109,13 @@ Semua senarai ada dalam `app/src/main/java/com/jagalink/LinkAnalyzer.kt`:
 - `SUSPICIOUS_TLDS`, `SHORTENERS`
 - `ADULT_SITES`, `ADULT_WORDS` – laman lucah yang disekat
 
+## ⚠️ Penafian
+JagaPMA ialah **alat bantuan untuk mencegah** dan mengurangkan risiko penipuan dalam talian — **bukan jaminan**. Ia tidak dapat mengesan semua link, laman atau mesej scam, dan amaran yang diberi mungkin tidak tepat sepenuhnya.
+
+JagaPMA dan pembangunnya **tidak bertanggungjawab** atas sebarang kerugian wang, kerosakan data atau penipuan yang berlaku semasa atau selepas menggunakan app ini. Keputusan untuk membuka link, memasang app atau berkongsi maklumat adalah tanggungjawab pengguna sendiri. App ini disediakan "seadanya" (*as is*) tanpa sebarang waranti.
+
+JagaPMA **tidak berkaitan** dengan mana-mana bank, agensi kerajaan atau syarikat yang disebut dalam app atau dokumen ini. Semua nama dan jenama adalah milik pemilik masing-masing dan disebut hanya untuk mengenal pasti laman tiruan.
+
 ## Had
 - Ini pengesan berasaskan peraturan — ia tangkap kebanyakan taktik biasa tetapi bukan 100%. Teruskan ingatkan Mak: **jangan pasang APK, jangan bagi OTP/TAC**.
 - Kalau terkena scam: hubungi **NSRC 997** secepat mungkin, dan bank.
@@ -190,6 +197,13 @@ JagaPMA checks GitHub **once a day** and whenever the app is opened. When a new 
 3. Android asks for confirmation → tap **Install**. Settings and permissions are kept.
 
 You can also check manually: open JagaPMA → **4. Updates → Check for updates**.
+
+### ⚠️ Disclaimer
+JagaPMA is a **helper tool to prevent** and reduce the risk of online scams — **not a guarantee**. It cannot detect every scam link, site or message, and its warnings may not always be accurate.
+
+JagaPMA and its developer are **not responsible** for any financial loss, data damage or fraud that happens while or after using this app. The decision to open a link, install an app or share information is the user's own responsibility. The app is provided "as is", without any warranty.
+
+JagaPMA is **not affiliated** with any bank, government agency or company mentioned in the app or these documents. All names and brands belong to their owners and are mentioned only to identify imitation sites.
 
 ### Limits
 - This is a rule-based detector — it catches most common tricks but not 100%. Keep reminding your parent: **never install APKs, never share OTP/TAC codes**.

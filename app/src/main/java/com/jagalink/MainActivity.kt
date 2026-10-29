@@ -220,6 +220,39 @@ class MainActivity : Activity() {
             if (fromNotification || (Prefs.autoUpdate(this) && stale)) checkUpdate(quiet = !fromNotification)
         }
 
+        // Penafian — JagaPMA alat bantuan pencegahan, bukan jaminan
+        col.addView(header(tr("Penafian", "Disclaimer", "免责声明")).apply { textSize = 16f })
+        col.addView(
+            label(
+                tr(
+                    "JagaPMA ialah alat bantuan untuk MENCEGAH dan mengurangkan risiko penipuan dalam talian. " +
+                        "Ia tidak dapat mengesan semua link, laman atau mesej scam, dan amaran yang diberi mungkin tidak tepat sepenuhnya.\n\n" +
+                        "JagaPMA dan pembangunnya tidak bertanggungjawab atas sebarang kerugian wang, kerosakan atau penipuan yang berlaku " +
+                        "semasa atau selepas menggunakan app ini. Keputusan untuk membuka link, memasang app atau berkongsi maklumat " +
+                        "adalah tanggungjawab pengguna sendiri.\n\n" +
+                        "Jangan sekali-kali kongsi OTP/TAC, kata laluan atau maklumat bank dengan sesiapa. " +
+                        "Jika terkena scam, segera hubungi NSRC 997 dan bank anda.\n\n" +
+                        "JagaPMA tidak berkaitan dengan mana-mana bank, agensi kerajaan atau syarikat yang disebut dalam app ini.",
+                    "JagaPMA is a helper tool to PREVENT and reduce the risk of online scams. " +
+                        "It cannot detect every scam link, site or message, and its warnings may not always be accurate.\n\n" +
+                        "JagaPMA and its developer are not responsible for any financial loss, damage or fraud that happens " +
+                        "while or after using this app. The decision to open a link, install an app or share information " +
+                        "is the user's own responsibility.\n\n" +
+                        "Never share OTP/TAC codes, passwords or bank details with anyone. " +
+                        "If you are scammed, contact NSRC 997 and your bank immediately.\n\n" +
+                        "JagaPMA is not affiliated with any bank, government agency or company mentioned in this app.",
+                    "JagaPMA 是一个用于预防和降低网络诈骗风险的辅助工具。" +
+                        "它无法检测所有诈骗链接、网站或信息，提醒也不一定完全准确。\n\n" +
+                        "JagaPMA 及其开发者不对使用本应用期间或之后发生的任何金钱损失、损害或诈骗负责。" +
+                        "是否打开链接、安装应用或分享资料，由用户自行负责。\n\n" +
+                        "千万不要把 OTP/TAC 验证码、密码或银行资料告诉任何人。" +
+                        "如果被骗，请立即联系 NSRC 997 和您的银行。\n\n" +
+                        "JagaPMA 与应用中提到的任何银行、政府机构或公司均无关联。",
+                ),
+                13f, color = grey
+            )
+        )
+
         col.addView(
             label(
                 "JagaPMA v${BuildConfig.VERSION_NAME} · " +
