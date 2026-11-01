@@ -50,7 +50,10 @@ templates next to Chinese text use `${name}`, not `$name` (Han characters count 
 - `BotView.kt` – animated robot drawn on Canvas (100×100 design grid).
 - `Support.kt` – Prefs, watched app package list, TTS (ms-MY → id-ID fallback), vibration,
   fallback notification, browser picker.
-- `MainActivity.kt` – setup screen (permission checklist, name/phone settings, test box).
+- `MainActivity.kt` – two views: `HomeScreen` (Home.kt, Concept B "Kawan Bot": bot bubble, 3 reply pills — check link,
+  call child, "I was scammed" — and a status strip) shown once setup is complete, and the setup/settings view
+  (`buildSettings()`: guide card, checklist, name/phone, test box, updates) behind "Tetapan anak". Back returns home.
+  Warning card (`BotUi.build`) uses the same style: tinted card, white bordered bubble, pill buttons.
 
 The package list in `Watched.APPS` (Support.kt) must stay in sync with
 `res/xml/accessibility_config.xml`.

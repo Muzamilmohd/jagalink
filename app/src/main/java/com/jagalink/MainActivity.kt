@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
+import android.window.OnBackInvokedDispatcher
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -37,10 +38,152 @@ class MainActivity : Activity() {
     private var nameField: EditText? = null
     private val grey = Color.rgb(97, 97, 97)
 
+    private lateinit var settingsView: View
+    private var showingSettings = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Blocklist.ensureLoaded(this)
         Blocklist.refreshIfStale(this)
+        settingsView = buildSettings()
+        // Mak nampak skrin utama; tetapan dibuka terus kalau setup belum siap (atau dari notifikasi update)
+        val wantSettings = savedInstanceState?.getBoolean("settings") == true ||
+            intent?.getBooleanExtra(EXTRA_CHECK_UPDATE, false) == true ||
+            Prefs.inSecondProfile() || !setupComplete()
+        if (wantSettings) showSettings() else showHome()
+        if (Build.VERSION.SDK_INT >= 33) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT) { handleBack() }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("settings", showingSettings) // kekal di tetapan selepas tukar bahasa
+    }
+
+    private fun setupComplete(): Boolean = steps().all { it.done }
+
+    private fun showHome() {
+        showingSettings = false
+        setContentView(
+            HomeScreen.build(
+                this,
+                protected = isDefaultBrowser(),
+                onCheck = { checkLinkDialog() },
+                onCall = { callChild() },
+                onScammed = { scammedDialog() },
+                onSettings = { showSettings() },
+            )
+        )
+    }
+
+    private fun showSettings() {
+        showingSettings = true
+        refreshStatus()
+        setContentView(settingsView)
+        scrollView?.scrollTo(0, 0)
+    }
+
+    private fun handleBack() {
+        if (showingSettings && !Prefs.inSecondProfile()) showHome() else finish()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        handleBack()
+    }
+
+    // ------------------------------------------------------------ skrin utama: tindakan
+
+    private fun checkLinkDialog() {
+        val input = EditText(this).apply {
+            hint = tr("Tampal link atau mesej di sini", "Paste a link or message here", "在这里粘贴链接或信息")
+            textSize = 20f
+            minLines = 3
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        }
+        val box = LinearLayout(this).apply {
+            setPadding(dp(20), dp(8), dp(20), 0)
+            addView(input, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+        }
+        AlertDialog.Builder(this)
+            .setTitle(tr("Semak link", "Check a link", "检查链接"))
+            .setView(box)
+            .setPositiveButton(tr("Semak", "Check", "检查")) { _, _ -> checkText(input.text.toString()) }
+            .setNegativeButton(tr("Batal", "Cancel", "取消"), null)
+            .show()
+    }
+
+    private fun checkText(text: String) {
+        val verdicts = LinkAnalyzer.analyzeMessage(text, Prefs.lang(this))
+        if (verdicts.isEmpty()) {
+            toast(tr("Tiada link dijumpai.", "No link found.", "没有发现链接。"))
+            return
+        }
+        val worst = verdicts.maxByOrNull { it.score }!!
+        if (worst.level != Level.SAFE) {
+            showBot(worst, tr("Semakan", "Check", "检查"))
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle(tr("✅ Nampak selamat", "✅ Looks safe", "✅ 看起来安全"))
+            .setMessage(
+                worst.url + "\n\n" + tr(
+                    "Bot tak jumpa tanda scam. Tapi tetap jangan beri OTP atau kata laluan kepada sesiapa.",
+                    "The bot found no sign of a scam. Still, never give your OTP or password to anyone.",
+                    "机器人没有发现诈骗迹象。但仍然不要把 OTP 或密码告诉任何人。",
+                )
+            )
+            .setPositiveButton(tr("OK", "OK", "好的"), null)
+            .show()
+    }
+
+    private fun callChild() {
+        val phone = Prefs.phone(this)
+        if (phone.isBlank()) {
+            AlertDialog.Builder(this)
+                .setMessage(
+                    tr(
+                        "Nombor anak belum diisi. Minta anak isi dalam \"Tetapan anak\".",
+                        "Your child's number isn't set yet. Ask them to fill it in under \"Child's settings\".",
+                        "还没有填写孩子的号码。请孩子在「孩子设置」中填写。",
+                    )
+                )
+                .setPositiveButton(tr("Tetapan anak", "Child's settings", "孩子设置")) { _, _ -> showSettings() }
+                .setNegativeButton(tr("Tutup", "Close", "关闭"), null)
+                .show()
+            return
+        }
+        try {
+            startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun scammedDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(tr("Jangan panik. Buat ni sekarang:", "Don't panic. Do this now:", "别慌。现在就这样做："))
+            .setMessage(
+                tr(
+                    "1. Telefon NSRC 997 secepat mungkin.\n2. Telefon bank dan minta sekat akaun / kad.\n3. Jangan beri OTP atau kata laluan lagi kepada sesiapa.\n4. Beritahu anak.",
+                    "1. Call NSRC 997 as soon as possible.\n2. Call your bank and ask them to block your account / card.\n3. Don't give any more OTPs or passwords to anyone.\n4. Tell your child.",
+                    "1. 尽快拨打 NSRC 997。\n2. 打电话给银行，要求冻结账户或银行卡。\n3. 不要再把 OTP 或密码告诉任何人。\n4. 告诉孩子。",
+                )
+            )
+            .setPositiveButton(tr("📞 Telefon 997", "📞 Call 997", "📞 拨打 997")) { _, _ ->
+                try {
+                    startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:997")))
+                } catch (_: Exception) {
+                }
+            }
+            .setNeutralButton(tr("Telefon anak", "Call my child", "打电话给孩子")) { _, _ -> callChild() }
+            .setNegativeButton(tr("Tutup", "Close", "关闭"), null)
+            .show()
+    }
+
+    // ------------------------------------------------------------ tetapan (untuk anak)
+
+    private fun buildSettings(): View {
         val scroll = ScrollView(this)
         scrollView = scroll
         val col = LinearLayout(this).apply {
@@ -56,6 +199,9 @@ class MainActivity : Activity() {
                 insets
             }
         }
+
+        // Kembali ke skrin Mak
+        if (!Prefs.inSecondProfile()) col.addView(button(tr("←  Kembali ke skrin utama", "←  Back to home screen", "←  返回主屏幕")) { showHome() })
 
         col.addView(BotView(this, Level.SAFE), LinearLayout.LayoutParams(dp(120), dp(120)).apply {
             gravity = Gravity.CENTER_HORIZONTAL
@@ -261,7 +407,7 @@ class MainActivity : Activity() {
             ).apply { setPadding(0, dp(32), 0, 0) }
         )
 
-        setContentView(scroll)
+        return scroll
     }
 
     // ------------------------------------------------------------ kemas kini
@@ -327,6 +473,7 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         refreshStatus()
+        if (!showingSettings) showHome() // status perlindungan mungkin dah berubah
         Health.schedule(this)
         Health.check(this) // padam amaran "tak aktif" bila dah dibetulkan
     }

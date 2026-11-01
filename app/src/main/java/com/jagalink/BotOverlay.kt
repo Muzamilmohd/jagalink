@@ -117,8 +117,10 @@ object BotUi {
     ): View {
         val name = Prefs.callName(ctx)
         val danger = v.level == Level.DANGER
-        val accent = if (danger) Color.rgb(211, 47, 47) else Color.rgb(239, 108, 0)
-        val tint = if (danger) Color.rgb(255, 235, 238) else Color.rgb(255, 243, 224)
+        // Konsep B: latar kad berwarna lembut, belon putih bersempadan, butang jawapan berbentuk pil
+        val accent = if (danger) Color.rgb(179, 38, 30) else Color.rgb(194, 65, 12)
+        val accentDark = if (danger) Color.rgb(138, 28, 22) else Color.rgb(154, 52, 18)
+        val tint = if (danger) Color.rgb(253, 236, 234) else Color.rgb(255, 243, 224)
 
         val root = FrameLayout(ctx).apply {
             setBackgroundColor(Color.argb(190, 0, 0, 0))
@@ -137,18 +139,30 @@ object BotUi {
             gravity = Gravity.CENTER_HORIZONTAL
             setPadding(ctx.dp(20), ctx.dp(14), ctx.dp(20), ctx.dp(20))
             background = GradientDrawable().apply {
-                setColor(Color.WHITE)
-                cornerRadius = ctx.dp(26).toFloat()
-                setStroke(ctx.dp(4), accent)
+                setColor(tint)
+                cornerRadius = ctx.dp(28).toFloat()
             }
         }
         scroll.addView(card, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 
-        card.addView(BotView(ctx, v.level), LinearLayout.LayoutParams(ctx.dp(130), ctx.dp(130)))
+        card.addView(BotView(ctx, v.level), LinearLayout.LayoutParams(ctx.dp(124), ctx.dp(124)))
+
+        // Belon kata bot: tajuk + mesej + link + sebab
+        val bubble = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(ctx.dp(18), ctx.dp(16), ctx.dp(18), ctx.dp(16))
+            background = GradientDrawable().apply {
+                setColor(Color.WHITE)
+                cornerRadius = ctx.dp(22).toFloat()
+                setStroke(ctx.dp(3), accent)
+            }
+        }
+        card.addView(bubble, spaced(ctx, 6))
 
         val title = if (v.adult) ctx.tr("🚫 Link disekat", "🚫 Link blocked", "🚫 链接已拦截")
-        else ctx.tr("⚠️ $name, hati-hati!", "⚠️ $name, be careful!", "⚠️ $name，小心！")
-        card.addView(text(ctx, title, 26f, accent, bold = true))
+        else if (danger) ctx.tr("$name, tunggu dulu!", "$name, wait!", "${name}，等一下！")
+        else ctx.tr("$name, sekejap…", "$name, hold on…", "${name}，稍等…")
+        bubble.addView(text(ctx, title, 28f, accentDark, bold = true).apply { gravity = Gravity.START })
 
         val bubbleMsg = if (v.adult) ctx.tr(
             "Link ni ke laman lucah (tak senonoh). Bot dah sekat supaya $name tak terbuka.",
@@ -163,37 +177,44 @@ object BotUi {
             "This link looks suspicious. Don't tap it yet — ask your child if you're not sure.",
             "这个链接看起来可疑。先不要点击——不确定的话问问孩子。",
         )
-        card.addView(text(ctx, bubbleMsg, 18f, Color.rgb(33, 33, 33)).apply {
-            setPadding(ctx.dp(14), ctx.dp(12), ctx.dp(14), ctx.dp(12))
-            background = GradientDrawable().apply { setColor(tint); cornerRadius = ctx.dp(16).toFloat() }
-        }, spaced(ctx, 10))
+        bubble.addView(text(ctx, bubbleMsg, 20f, Color.rgb(17, 24, 39)).apply {
+            gravity = Gravity.START
+            setLineSpacing(0f, 1.15f)
+        }, spaced(ctx, 8))
 
-        if (app != null) {
-            val found = ctx.tr("Dijumpai dalam: $app", "Found in: $app", "发现于：$app")
-            card.addView(text(ctx, found, 14f, Color.GRAY), spaced(ctx, 8))
-        }
-
-        card.addView(text(ctx, v.url, 13f, Color.rgb(97, 97, 97)).apply {
+        bubble.addView(text(ctx, v.url, 14f, Color.rgb(55, 65, 81)).apply {
             typeface = Typeface.MONOSPACE
+            gravity = Gravity.START
             maxLines = 2
             ellipsize = TextUtils.TruncateAt.END
-        }, spaced(ctx, 4))
+            setPadding(ctx.dp(10), ctx.dp(6), ctx.dp(10), ctx.dp(6))
+            background = GradientDrawable().apply { setColor(Color.rgb(245, 245, 245)); cornerRadius = ctx.dp(10).toFloat() }
+        }, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { topMargin = ctx.dp(10) })
 
         if (v.reasons.isNotEmpty()) {
-            card.addView(
-                text(ctx, v.reasons.take(3).joinToString("\n") { "• $it" }, 15f, Color.rgb(66, 66, 66))
+            bubble.addView(
+                text(ctx, v.reasons.take(2).joinToString("\n") { "• $it" }, 16f, Color.rgb(75, 85, 99))
                     .apply { gravity = Gravity.START },
                 spaced(ctx, 10)
             )
         }
 
-        val okLabel = ctx.tr("👍  OK, saya tak tekan", "👍  OK, I won't tap it", "👍  好的，我不点击")
-        card.addView(bigButton(ctx, okLabel, Color.rgb(46, 125, 50)) { onDismiss() }, spaced(ctx, 16))
+        if (app != null) {
+            val found = ctx.tr("Dijumpai dalam: $app", "Found in: $app", "发现于：$app")
+            card.addView(text(ctx, found, 14f, Color.rgb(75, 85, 99)), spaced(ctx, 8))
+        }
+
+        card.addView(text(ctx, ctx.tr("$name nak buat apa?", "What would you like to do?", "${name}想做什么？"), 18f, Color.rgb(75, 85, 99)).apply {
+            gravity = Gravity.START
+        }, spaced(ctx, 14))
+
+        val okLabel = ctx.tr("Baik, saya tak buka", "OK, I won't open it", "好的，我不打开")
+        card.addView(pill(ctx, okLabel, fill = Color.rgb(27, 127, 59), textColor = Color.WHITE) { onDismiss() }, spaced(ctx, 8))
 
         val phone = Prefs.phone(ctx)
         if (phone.isNotBlank()) {
-            val sendLabel = ctx.tr("💬  Hantar link ke anak", "💬  Send link to my child", "💬  把链接发给孩子")
-            card.addView(bigButton(ctx, sendLabel, Color.rgb(37, 211, 102)) {
+            val sendLabel = ctx.tr("Tanya anak dulu (WhatsApp)", "Ask my child first (WhatsApp)", "先问孩子（WhatsApp）")
+            card.addView(pill(ctx, sendLabel, fill = Color.WHITE, textColor = Color.rgb(11, 87, 208), stroke = Color.rgb(11, 87, 208)) {
                 if (!AskChild.send(ctx, v, app)) {
                     Toast.makeText(ctx, ctx.tr("Tak dapat buka WhatsApp / SMS", "Couldn't open WhatsApp / SMS", "无法打开 WhatsApp / 短信"), Toast.LENGTH_SHORT).show()
                 }
@@ -253,6 +274,26 @@ object BotUi {
         }
         return root
     }
+
+    /** Butang jawapan berbentuk pil (Konsep B). */
+    private fun pill(ctx: Context, label: String, fill: Int, textColor: Int, stroke: Int? = null, onClick: () -> Unit) =
+        TextView(ctx).apply {
+            text = label
+            textSize = 22f
+            setTextColor(textColor)
+            setTypeface(typeface, Typeface.BOLD)
+            gravity = Gravity.CENTER
+            minHeight = ctx.dp(72)
+            setPadding(ctx.dp(18), ctx.dp(12), ctx.dp(18), ctx.dp(12))
+            background = GradientDrawable().apply {
+                setColor(fill)
+                cornerRadius = ctx.dp(40).toFloat()
+                if (stroke != null) setStroke(ctx.dp(3), stroke)
+            }
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { onClick() }
+        }
 
     private fun openExternal(ctx: Context, intent: Intent) {
         try {
