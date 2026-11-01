@@ -102,7 +102,7 @@ When your parent taps a link in WhatsApp, Telegram, SMS, Facebook or email, Jaga
 |---|---|---|
 | App icon | 512 × 512 PNG | `play/graphics/icon-512.png` |
 | Feature graphic | 1024 × 500 PNG/JPG | `play/graphics/feature-1024x500.png` |
-| Phone screenshots | 2–8 keping, sisi panjang ≤ 2× sisi pendek | `play/graphics/screenshot-1-setup.png`, `screenshot-2-amaran.png`, `screenshot-3-apk.png` (1080 × 2160) |
+| Phone screenshots | 2–8 keping, sisi panjang ≤ 2× sisi pendek | `play/graphics/screenshot-1-home.png`, `screenshot-2-amaran.png`, `screenshot-3-tetapan.png` (1080 × 2160) |
 
 > Jangan letak logo bank sebenar dalam grafik/screenshot — Google boleh anggap menyamar jenama.
 

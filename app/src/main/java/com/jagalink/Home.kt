@@ -106,19 +106,27 @@ object HomeScreen {
         // Ruang kosong — jalur status sentiasa di bawah
         col.addView(View(ctx), LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f).apply { topMargin = ctx.dp(20) })
 
+        // Teks besar → "Tetapan anak" turun ke baris sendiri (elak "Perlind-ungan" terpotong)
+        val bigText = ctx.resources.configuration.fontScale > 1.3f
         val status = LinearLayout(ctx).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
+            orientation = if (bigText) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
+            gravity = if (bigText) Gravity.START else Gravity.CENTER_VERTICAL
             setPadding(ctx.dp(18), ctx.dp(8), ctx.dp(8), ctx.dp(8))
             background = GradientDrawable().apply { setColor(Color.WHITE); cornerRadius = ctx.dp(18).toFloat() }
         }
-        status.addView(View(ctx).apply {
+        val statusRow = LinearLayout(ctx).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            minimumHeight = ctx.dp(48)
+        }
+        status.addView(statusRow, if (bigText) LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT) else LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        statusRow.addView(View(ctx).apply {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
                 setColor(if (protected) GREEN else Color.rgb(234, 88, 12))
             }
         }, LinearLayout.LayoutParams(ctx.dp(12), ctx.dp(12)))
-        status.addView(TextView(ctx).apply {
+        statusRow.addView(TextView(ctx).apply {
             text = if (protected) ctx.tr("Perlindungan aktif", "Protection on", "保护已开启")
             else ctx.tr("Belum siap", "Not set up", "尚未设置")
             textSize = 17f

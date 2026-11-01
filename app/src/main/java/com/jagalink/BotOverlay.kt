@@ -145,7 +145,9 @@ object BotUi {
         }
         scroll.addView(card, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 
-        card.addView(BotView(ctx, v.level), LinearLayout.LayoutParams(ctx.dp(124), ctx.dp(124)))
+        // Teks besar (tetapan saiz fon phone) → bot lebih kecil supaya butang muat dalam skrin
+        val botDp = if (ctx.resources.configuration.fontScale > 1.3f) 84 else 124
+        card.addView(BotView(ctx, v.level), LinearLayout.LayoutParams(ctx.dp(botDp), ctx.dp(botDp)))
 
         // Belon kata bot: tajuk + mesej + link + sebab
         val bubble = LinearLayout(ctx).apply {
@@ -182,7 +184,17 @@ object BotUi {
             setLineSpacing(0f, 1.15f)
         }, spaced(ctx, 8))
 
-        bubble.addView(text(ctx, v.url, 14f, Color.rgb(55, 65, 81)).apply {
+        // Butiran (link + sebab) diletak SELEPAS butang — supaya butang sentiasa nampak walaupun teks besar
+        val details = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(ctx.dp(16), ctx.dp(12), ctx.dp(16), ctx.dp(14))
+            background = GradientDrawable().apply { setColor(Color.WHITE); cornerRadius = ctx.dp(18).toFloat() }
+        }
+        details.addView(text(ctx, if (danger) ctx.tr("Kenapa bahaya:", "Why it's dangerous:", "为什么危险：") else ctx.tr("Kenapa mencurigakan:", "Why it looks suspicious:", "为什么可疑："), 15f, Color.rgb(75, 85, 99), bold = true).apply {
+            gravity = Gravity.START
+        })
+
+        details.addView(text(ctx, v.url, 14f, Color.rgb(55, 65, 81)).apply {
             typeface = Typeface.MONOSPACE
             gravity = Gravity.START
             maxLines = 2
@@ -192,7 +204,7 @@ object BotUi {
         }, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { topMargin = ctx.dp(10) })
 
         if (v.reasons.isNotEmpty()) {
-            bubble.addView(
+            details.addView(
                 text(ctx, v.reasons.take(2).joinToString("\n") { "• $it" }, 16f, Color.rgb(75, 85, 99))
                     .apply { gravity = Gravity.START },
                 spaced(ctx, 10)
@@ -201,7 +213,7 @@ object BotUi {
 
         if (app != null) {
             val found = ctx.tr("Dijumpai dalam: $app", "Found in: $app", "发现于：$app")
-            card.addView(text(ctx, found, 14f, Color.rgb(75, 85, 99)), spaced(ctx, 8))
+            details.addView(text(ctx, found, 14f, Color.rgb(75, 85, 99)).apply { gravity = Gravity.START }, spaced(ctx, 8))
         }
 
         card.addView(text(ctx, ctx.tr("$name nak buat apa?", "What would you like to do?", "${name}想做什么？"), 18f, Color.rgb(75, 85, 99)).apply {
@@ -221,6 +233,8 @@ object BotUi {
                 onDismiss()
             }, spaced(ctx, 10))
         }
+
+        card.addView(details, spaced(ctx, 14))
 
         // Dah terkena? Terus ke talian bantuan rasmi
         card.addView(text(ctx, ctx.tr("Dah terkena scam?", "Already scammed?", "已经被骗了？"), 14f, Color.GRAY), spaced(ctx, 14))

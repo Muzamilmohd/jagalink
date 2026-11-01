@@ -36,6 +36,7 @@ class MainActivity : Activity() {
     private lateinit var resultText: TextView
     private var scrollView: ScrollView? = null
     private var nameField: EditText? = null
+    private var backButton: View? = null
     private val grey = Color.rgb(97, 97, 97)
 
     private lateinit var settingsView: View
@@ -201,7 +202,8 @@ class MainActivity : Activity() {
         }
 
         // Kembali ke skrin Mak
-        if (!Prefs.inSecondProfile()) col.addView(button(tr("←  Kembali ke skrin utama", "←  Back to home screen", "←  返回主屏幕")) { showHome() })
+        backButton = button(tr("←  Kembali ke skrin utama", "←  Back to home screen", "←  返回主屏幕")) { showHome() }
+        col.addView(backButton)
 
         col.addView(BotView(this, Level.SAFE), LinearLayout.LayoutParams(dp(120), dp(120)).apply {
             gravity = Gravity.CENTER_HORIZONTAL
@@ -499,13 +501,17 @@ class MainActivity : Activity() {
             tr("Pengawal link (jadikan browser utama)", "Link guard (set as default browser)", "链接守卫（设为默认浏览器）"),
             tr("Jadikan JagaPMA browser utama", "Make JagaPMA the default browser", "把 JagaPMA 设为默认浏览器"),
             tr(
-                "Ini perlindungan utama — setiap link yang ditekan disemak dulu. Link selamat tetap dibuka dalam Chrome. Pilih JagaPMA bila ditanya.",
-                "This is the main protection — every tapped link is checked first. Safe links still open in Chrome. Choose JagaPMA when asked.",
-                "这是主要保护——每个被点击的链接都会先检查。安全的链接仍会在 Chrome 中打开。被询问时请选择 JagaPMA。",
+                "Ini perlindungan utama — setiap link yang ditekan disemak dulu. Link selamat tetap dibuka dalam Chrome.\n\n" +
+                    "Bila ditanya: tekan JagaPMA dulu, kemudian tekan \"Tetapkan sebagai lalai\" (Set as default).",
+                "This is the main protection — every tapped link is checked first. Safe links still open in Chrome.\n\n" +
+                    "When asked: tap JagaPMA first, then tap \"Set as default\".",
+                "这是主要保护——每个被点击的链接都会先检查。安全的链接仍会在 Chrome 中打开。\n\n" +
+                    "被询问时：先点 JagaPMA，再点「设为默认」(Set as default)。",
             ),
             isDefaultBrowser(),
         ) { requestBrowserRole() }
-        list += Step(
+        // Versi Play: pengawal link hanya berjalan bila link ditekan (tiada servis latar), jadi langkah bateri tak perlu
+        if (!BuildConfig.PLAY) list += Step(
             tr("Jangan dimatikan di latar belakang", "Keep running in the background", "保持在后台运行"),
             tr("Jangan biar phone tutup JagaPMA", "Don't let the phone close JagaPMA", "不要让手机关闭 JagaPMA"),
             tr(
@@ -576,8 +582,11 @@ class MainActivity : Activity() {
                         "JagaPMA 正在守护${Prefs.callName(this)}。点击的链接会先被检查。",
                     ),
                     16f
-                ).apply { setPadding(0, dp(6), 0, 0) }
+                ).apply { setPadding(0, dp(6), 0, dp(12)) }
             )
+            if (!Prefs.inSecondProfile()) {
+                box.addView(BotUi.bigButton(this, tr("Pergi ke skrin utama  ➜", "Go to the home screen  ➜", "前往主屏幕  ➜"), accent) { showHome() })
+            }
         } else {
             val s = steps[next]
             box.addView(
@@ -593,6 +602,8 @@ class MainActivity : Activity() {
     private fun refreshStatus() {
         statusBox.removeAllViews()
         val steps = steps()
+        // Butang kembali hanya bila setup dah siap — jangan biar pengguna lari dari setup
+        backButton?.visibility = if (steps.all { it.done } && !Prefs.inSecondProfile()) View.VISIBLE else View.GONE
         statusBox.addView(guideCard(steps), LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = dp(12) })
         for (s in steps) if (s.row.isNotEmpty()) row(s.row, s.done) { s.action() }
 
